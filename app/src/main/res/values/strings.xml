@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Applocker</string>
+    <string name="app_Manager">Application Manager</string>
+    <string name="app_internet">Internet</string>
+    <string name="app_privacy">Privacy</string>
+    <string name="app_price">Price</string>
 </resources>
