@@ -1,6 +1,7 @@
 
 package com.codeartist.applocker.activity;
 
+import com.codeartist.applocker.R;
 import com.codeartist.applocker.utility.Constants;
 import com.codeartist.applocker.utility.Preferences;
 
@@ -14,8 +15,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import codeartist.applocker.R;
 
 /**
  * Created by bjit-16 on 11/23/16.

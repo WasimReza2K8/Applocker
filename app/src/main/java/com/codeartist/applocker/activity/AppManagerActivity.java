@@ -4,6 +4,7 @@ package com.codeartist.applocker.activity;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.codeartist.applocker.R;
 import com.codeartist.applocker.adapter.AppManagerAdapter;
 import com.codeartist.applocker.db.DBManager;
 import com.codeartist.applocker.model.AppManagerModel;
@@ -29,8 +30,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-
-import codeartist.applocker.R;
 
 /**
  * Created by Wasim on 11/16/16.
@@ -71,6 +70,7 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
         bindService(new Intent(this, AppLockerService.class), mConnection,
                 BIND_AUTO_CREATE);
         new GetApplication().execute();
+     //   addShortcut();
     }
 
     private void appLocked(View view, String packageName) throws ClassCastException {
@@ -89,6 +89,28 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
         }
         sendMessageToService(packageName, AppLockerService.MSG_APP_UNLOCK);
         // Log.e("locker", "unlocked");
+    }
+
+    private void addShortcut() {
+        // Adding shortcut for MainActivity
+        // on Home screen
+        Intent shortcutIntent = new Intent(getApplicationContext(),
+                AppManagerActivity.class);
+
+        shortcutIntent.setAction(Intent.ACTION_MAIN);
+
+        Intent addIntent = new Intent();
+        addIntent
+                .putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
+        addIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, getString(R.string.app_name));
+        addIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE,
+                Intent.ShortcutIconResource.fromContext(getApplicationContext(),
+                        R.mipmap.ic_launcher));
+
+        addIntent
+                .setAction("com.android.launcher.action.INSTALL_SHORTCUT");
+        addIntent.putExtra("duplicate", false); // may it's already there so don't duplicate
+        getApplicationContext().sendBroadcast(addIntent);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.codeartist.applocker.adapter;
 
 import java.util.ArrayList;
 
+import com.codeartist.applocker.R;
 import com.codeartist.applocker.model.AppManagerModel;
 
 import android.content.Context;
@@ -12,8 +13,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import codeartist.applocker.R;
 
 /**
  * Created by Wasim on 11/16/16.

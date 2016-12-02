@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.codeartist.applocker.R;
 import com.codeartist.applocker.db.DBManager;
 import com.codeartist.applocker.interfaces.OnHomePressedListener;
 import com.codeartist.applocker.utility.Constants;
@@ -36,8 +37,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import codeartist.applocker.R;
 
 /**
  * Created by bjit-16 on 11/14/16.
@@ -206,7 +205,7 @@ public class AppLockerService extends Service {
         } else {
             activityOnTop = mActivityManager.getRunningTasks(1).get(0).topActivity.getPackageName();
         }
-         Log.e("activity on TOp", "" + activityOnTop);
+        Log.e("activity on TOp", "" + activityOnTop);
 
         // Provide the package name(s) of apps here, you want to show password activity
         if (activityList.contains(activityOnTop)) {
