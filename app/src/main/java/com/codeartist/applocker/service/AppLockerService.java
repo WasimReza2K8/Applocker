@@ -12,6 +12,7 @@ import com.codeartist.applocker.utility.Constants;
 import com.codeartist.applocker.utility.HomeWatcher;
 import com.codeartist.applocker.utility.Preferences;
 import com.codeartist.applocker.utility.Utils;
+import com.eftimoff.patternview.PatternView;
 
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
@@ -185,7 +186,8 @@ public class AppLockerService extends Service {
         public void handleMessage(Message msg) {
             String packageName = (String) msg.obj;
             // Log.e("mHandler", packageName + "");
-            showCheckerDialog(packageName);
+            // showCheckerDialog(packageName);
+            showPatternDialog(packageName);
             removeScheduleTask();
         }
     };
@@ -262,6 +264,76 @@ public class AppLockerService extends Service {
                             Preferences.KEY_APP_LOCKER_PASSWORD, null);
                     if (savedPassword != null && password.getText().toString() != null
                             && password.getText().toString().equals(savedPassword)) {
+                        destroyDialog();
+                        activityList.remove(packageName);
+                        scheduleMethod();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Wrong Password",
+                                Toast.LENGTH_LONG).show();
+                    }
+
+                }
+            });
+
+            checkerDialog.show();
+        }
+
+    }
+
+    private void showPatternDialog(final String packageName) {
+        if (checkerDialog == null || !checkerDialog.isShowing()) {
+
+            final Context context = getApplicationContext();
+            LayoutInflater layoutInflater = LayoutInflater.from(context);
+            widget = layoutInflater.inflate(R.layout.pattern_lock_layout, null);
+            final PatternView pattern = (PatternView) widget.findViewById(R.id.pattern);
+            checkerDialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+            checkerDialog.setCanceledOnTouchOutside(false);
+            checkerDialog.setCancelable(false);
+            checkerDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_PHONE);
+            checkerDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+            checkerDialog.getWindow().setFormat(PixelFormat.TRANSLUCENT);
+            checkerDialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT);
+            checkerDialog.setContentView(widget);
+            checkerDialog.getWindow().setGravity(Gravity.CENTER);
+            checkerDialog.setOnKeyListener(new Dialog.OnKeyListener() {
+                @Override
+                public boolean onKey(DialogInterface dialog, int keyCode,
+                        KeyEvent event) {
+
+                    if (keyCode == KeyEvent.KEYCODE_BACK) {
+                        Intent startMain = new Intent(Intent.ACTION_MAIN);
+                        startMain.addCategory(Intent.CATEGORY_HOME);
+                        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(startMain);
+                        destroyDialog();
+                        scheduleMethod();
+                        return true;
+
+                    }
+                    return false;
+                }
+            });
+
+            /*
+             * check.setOnClickListener(new View.OnClickListener() {
+             * @Override public void onClick(View view) { String savedPassword =
+             * Preferences.loadString(getApplicationContext(), Preferences.KEY_APP_LOCKER_PASSWORD,
+             * null); if (savedPassword != null && password.getText().toString() != null &&
+             * password.getText().toString().equals(savedPassword)) { destroyDialog();
+             * activityList.remove(packageName); scheduleMethod(); } else {
+             * Toast.makeText(getApplicationContext(), "Wrong Password", Toast.LENGTH_LONG).show();
+             * } } });
+             */
+
+            pattern.setOnPatternDetectedListener(new PatternView.OnPatternDetectedListener() {
+                @Override
+                public void onPatternDetected() {
+                    String savedPassword = Preferences.loadString(getApplicationContext(),
+                            Preferences.KEY_APP_LOCKER_PASSWORD, null);
+                    if (savedPassword != null && pattern.getPatternString() != null
+                            && pattern.getPatternString().equals(savedPassword)) {
                         destroyDialog();
                         activityList.remove(packageName);
                         scheduleMethod();

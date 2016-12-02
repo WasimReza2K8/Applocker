@@ -30,6 +30,10 @@
             android:name="com.codeartist.applocker.activity.PasswordSetterActivity"
             android:label="@string/app_name" />
 
+        <activity
+            android:name="com.codeartist.applocker.activity.PatternSetterActivity"
+            android:label="@string/app_name" />
+
         <service
             android:name="com.codeartist.applocker.service.AppLockerService"
             android:exported="false"></service>

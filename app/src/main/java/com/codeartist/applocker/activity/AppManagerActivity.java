@@ -159,7 +159,7 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
             String password = Preferences.loadString(getApplicationContext(),
                     Preferences.KEY_APP_LOCKER_PASSWORD, null);
             if (password == null) {
-                Intent intent = new Intent(AppManagerActivity.this, PasswordSetterActivity.class);
+                Intent intent = new Intent(AppManagerActivity.this, PatternSetterActivity.class);
                 intent.putExtra(Constants.KEY_PKG_NAME, item.getPackageName());
                 startActivityForResult(intent, REQUEST_CODE);
                 return;
