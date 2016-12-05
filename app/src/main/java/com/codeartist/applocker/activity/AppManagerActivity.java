@@ -48,9 +48,9 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_manager);
-        mAllAppsButton = (Button) findViewById(R.id.button_allApp);
+      /*  mAllAppsButton = (Button) findViewById(R.id.button_allApp);
         mLockAppsButton = (Button) findViewById(R.id.button_lockApp);
-        mPaidAppsButton = (Button) findViewById(R.id.button_paidApp);
+        mPaidAppsButton = (Button) findViewById(R.id.button_paidApp);*/
         mAppListView = (ListView) findViewById(R.id.listView_appManager);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar_AppList);
         mAdapter = new AppManagerAdapter(this, mClickListener);

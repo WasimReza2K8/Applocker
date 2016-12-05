@@ -323,15 +323,15 @@ public class AppLockerService extends Service {
                     }
                 }
             });
-            password.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            password.setOnTouchListener(new View.OnTouchListener() {
 
-                public void onFocusChange(View v, boolean hasFocus) {
-
-                    //if(hasFocus){
-                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
-                   // }
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
+                    return true;
                 }
+
             });
             checkerDialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
             checkerDialog.setCanceledOnTouchOutside(false);
