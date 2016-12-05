@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@mipmap/black_background">
 
     <TextView
         android:id="@+id/textView_setPassword"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_margin="@dimen/icon_margin"
+        android:layout_margin="@dimen/icon_size"
         android:textColor="@color/black"
         android:text="Set a Password" />
 
-    <com.eftimoff.patternview.PatternView
-        xmlns:patternview="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/pattern"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+
+    <com.takwolf.android.lock9.Lock9View
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/lock_9_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        patternview:circleSize="80dp"
-        patternview:pathColor="@color/primary_dark_material_light"
-        patternview:circleColor="@color/highlighted_text_material_light"
-        patternview:dotColor="@color/highlighted_text_material_light"
-        patternview:gridRows="3"
-        patternview:gridColumns="3"/>
+        app:nodeSrc="@drawable/lock_9_view_node_normal"
+        app:nodeOnSrc="@drawable/lock_9_view_node_highlighted"
+        app:lineColor="#ff006699"
+        app:lineWidth="8dp" />
 
 </LinearLayout>

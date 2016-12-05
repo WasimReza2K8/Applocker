@@ -12,7 +12,7 @@ import com.codeartist.applocker.utility.Constants;
 import com.codeartist.applocker.utility.HomeWatcher;
 import com.codeartist.applocker.utility.Preferences;
 import com.codeartist.applocker.utility.Utils;
-import com.eftimoff.patternview.PatternView;
+import com.takwolf.android.lock9.Lock9View;
 
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
@@ -189,8 +189,8 @@ public class AppLockerService extends Service {
         public void handleMessage(Message msg) {
             String packageName = (String) msg.obj;
             // Log.e("mHandler", packageName + "");
-            showCheckerDialog(packageName);
-            // showPatternDialog(packageName);
+            //showCheckerDialog(packageName);
+             showPatternDialog(packageName);
             removeScheduleTask();
         }
     };
@@ -391,7 +391,7 @@ public class AppLockerService extends Service {
             final Context context = getApplicationContext();
             LayoutInflater layoutInflater = LayoutInflater.from(context);
             widget = layoutInflater.inflate(R.layout.pattern_lock_layout, null);
-            final PatternView pattern = (PatternView) widget.findViewById(R.id.pattern);
+            final Lock9View pattern = (Lock9View) widget.findViewById(R.id.lock_9_view);
             checkerDialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
             checkerDialog.setCanceledOnTouchOutside(false);
             checkerDialog.setCancelable(false);
@@ -432,7 +432,7 @@ public class AppLockerService extends Service {
              * } } });
              */
 
-            pattern.setOnPatternDetectedListener(new PatternView.OnPatternDetectedListener() {
+          /*  pattern.setOnPatternDetectedListener(new PatternView.OnPatternDetectedListener() {
                 @Override
                 public void onPatternDetected() {
                     String savedPassword = Preferences.loadString(getApplicationContext(),
@@ -447,6 +447,23 @@ public class AppLockerService extends Service {
                                 Toast.LENGTH_LONG).show();
                     }
 
+                }
+            });*/
+
+            pattern.setCallBack(new Lock9View.CallBack() {
+                @Override
+                public void onFinish(String password) {
+                    String savedPassword = Preferences.loadString(getApplicationContext(),
+                            Preferences.KEY_APP_LOCKER_PASSWORD, null);
+                    if (savedPassword != null && password != null
+                            && password.equals(savedPassword)) {
+                        destroyDialog();
+                        activityList.remove(packageName);
+                        scheduleMethod();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Wrong Password",
+                                Toast.LENGTH_LONG).show();
+                    }
                 }
             });
 

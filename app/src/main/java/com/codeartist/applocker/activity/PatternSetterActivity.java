@@ -4,7 +4,7 @@ package com.codeartist.applocker.activity;
 import com.codeartist.applocker.R;
 import com.codeartist.applocker.utility.Constants;
 import com.codeartist.applocker.utility.Preferences;
-import com.eftimoff.patternview.PatternView;
+import com.takwolf.android.lock9.Lock9View;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -26,7 +26,28 @@ public class PatternSetterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pattern_lock_layout);
         final String packageName = getIntent().getStringExtra(Constants.KEY_PKG_NAME);
-        final PatternView materialLockView = (PatternView) findViewById(R.id.pattern);
+        final Lock9View materialLockView = (Lock9View) findViewById(R.id.lock_9_view);
+        materialLockView.setCallBack(new Lock9View.CallBack() {
+            @Override
+            public void onFinish(String password) {
+                if (patternString == null) {
+                    patternString = password;
+                    return;
+                }
+                if (patternString.equals(password)) {
+                    //Toast.makeText(getApplicationContext(), "PATTERN CORRECT", Toast.LENGTH_SHORT).show();
+                    Preferences.save(getApplicationContext(),
+                            Preferences.KEY_APP_LOCKER_PASSWORD, patternString);
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra(Constants.KEY_PKG_NAME, packageName);
+                    setResult(Activity.RESULT_OK, resultIntent);
+                    finish();
+                    return;
+                }
+                Toast.makeText(getApplicationContext(), "PATTERN NOT CORRECT", Toast.LENGTH_SHORT).show();
+//                patternView.clearPattern();
+            }
+        });
        /* materialLockView.setOnPatternListener(new MaterialLockView.OnPatternListener() {
             @Override
             public void onPatternDetected(List<MaterialLockView.Cell> pattern,
@@ -41,7 +62,7 @@ public class PatternSetterActivity extends AppCompatActivity {
             }
         });*/
 
-        materialLockView.setOnPatternDetectedListener(new PatternView.OnPatternDetectedListener() {
+       /* materialLockView.setOnPatternDetectedListener(new PatternView.OnPatternDetectedListener() {
 
             @Override
             public void onPatternDetected() {
@@ -63,6 +84,6 @@ public class PatternSetterActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "PATTERN NOT CORRECT", Toast.LENGTH_SHORT).show();
 //                patternView.clearPattern();
             }
-        });
+        });*/
     }
 }

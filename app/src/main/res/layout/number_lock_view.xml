@@ -194,6 +194,8 @@
             android:layout_centerHorizontal="true"
             android:inputType="numberPassword"
             android:maxLength="15"
+            android:textSize="18sp"
+            android:maxLines="1"
             android:textCursorDrawable="@null"
             android:textColor="@android:color/white"
             android:background="@null" />

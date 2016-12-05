@@ -24,8 +24,8 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.eftimoff:android-patternview:1.0.6@aar'
     compile 'com.android.support:appcompat-v7:25.0.0'
     compile 'com.andrognito.pinlockview:pinlockview:1.0.1'
+    compile 'com.takwolf.android:lock9view:0.0.2'
     testCompile 'junit:junit:4.12'
 }
