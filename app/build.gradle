@@ -26,5 +26,6 @@ dependencies {
     })
     compile 'com.eftimoff:android-patternview:1.0.6@aar'
     compile 'com.android.support:appcompat-v7:25.0.0'
+    compile 'com.andrognito.pinlockview:pinlockview:1.0.1'
     testCompile 'junit:junit:4.12'
 }

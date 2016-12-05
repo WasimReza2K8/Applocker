@@ -33,10 +33,13 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 /**
@@ -186,8 +189,8 @@ public class AppLockerService extends Service {
         public void handleMessage(Message msg) {
             String packageName = (String) msg.obj;
             // Log.e("mHandler", packageName + "");
-            // showCheckerDialog(packageName);
-            showPatternDialog(packageName);
+            showCheckerDialog(packageName);
+            // showPatternDialog(packageName);
             removeScheduleTask();
         }
     };
@@ -224,10 +227,112 @@ public class AppLockerService extends Service {
 
             final Context context = getApplicationContext();
             LayoutInflater layoutInflater = LayoutInflater.from(context);
-            widget = layoutInflater.inflate(R.layout.activity_password_check, null);
-            final Button check = (Button) widget.findViewById(R.id.button_check);
+            widget = layoutInflater.inflate(R.layout.number_lock_view, null);
+            final ImageButton check = (ImageButton) widget.findViewById(R.id.button_check);
             final EditText password = (EditText) widget
-                    .findViewById(R.id.editText_password);
+                    .findViewById(R.id.edt1);
+
+            Button button0 = (Button) widget.findViewById(R.id.button0);
+            Button button1 = (Button) widget.findViewById(R.id.button1);
+            Button button2 = (Button) widget.findViewById(R.id.button2);
+            Button button3 = (Button) widget.findViewById(R.id.button3);
+            Button button4 = (Button) widget.findViewById(R.id.button4);
+            Button button5 = (Button) widget.findViewById(R.id.button5);
+            Button button6 = (Button) widget.findViewById(R.id.button6);
+            Button button7 = (Button) widget.findViewById(R.id.button7);
+            Button button8 = (Button) widget.findViewById(R.id.button8);
+            Button button9 = (Button) widget.findViewById(R.id.button9);
+            Button buttonC = (Button) widget.findViewById(R.id.buttonC);
+
+            button1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    password.append("1");
+                }
+            });
+
+            button2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    password.append("2");
+                }
+            });
+
+            button3.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    password.append("3");
+                }
+            });
+
+            button4.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    password.append("4");
+                }
+            });
+
+            button5.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    password.append("5");
+                }
+            });
+
+            button6.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    password.append("6");
+                }
+            });
+
+            button7.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    password.append("7");
+                }
+            });
+
+            button8.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    password.append("8");
+                }
+            });
+
+            button9.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    password.append("9");
+                }
+            });
+
+            button0.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    password.append("0");
+                }
+            });
+
+            buttonC.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int length = password.getText().length();
+                    if (length > 0) {
+                        password.getText().delete(length - 1, length);
+                    }
+                }
+            });
+            password.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+                public void onFocusChange(View v, boolean hasFocus) {
+
+                    //if(hasFocus){
+                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
+                   // }
+                }
+            });
             checkerDialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
             checkerDialog.setCanceledOnTouchOutside(false);
             checkerDialog.setCancelable(false);
