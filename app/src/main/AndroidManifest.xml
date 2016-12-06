@@ -37,6 +37,7 @@
 
         <service
             android:name="com.codeartist.applocker.service.AppLockerService"
+            android:process="com.codeartist.applocker.alive_process"
             android:exported="false"></service>
     </application>
 

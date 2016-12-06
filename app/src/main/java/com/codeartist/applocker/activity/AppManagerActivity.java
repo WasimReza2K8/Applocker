@@ -107,7 +107,6 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
         if (view != null) {
             ImageView image = (ImageView) view;
             clockWiseOrAntiClockWise(image, true);
-
         }
         sendMessageToService(packageName, AppLockerService.MSG_APP_LOCK);
         // Log.e("locker", "locked");
