@@ -25,6 +25,8 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -73,10 +75,39 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
      //   addShortcut();
     }
 
+    public void clockWiseOrAntiClockWise(final ImageView image, final boolean isLocked){
+        int anim = isLocked ? R.anim.rotate_clock_wise: R.anim.rotate_anti_clock_wise;
+        Animation animation = AnimationUtils.loadAnimation(getApplicationContext(),
+                anim);
+        image.startAnimation(animation);
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                if(isLocked){
+                    image.setImageDrawable(getResources().getDrawable(R.mipmap.locker));
+                }else{
+                    image.setImageDrawable(getResources().getDrawable(R.mipmap.lock_open));
+                }
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+    }
+
     private void appLocked(View view, String packageName) throws ClassCastException {
         if (view != null) {
             ImageView image = (ImageView) view;
-            image.setImageDrawable(getResources().getDrawable(R.mipmap.locker));
+            clockWiseOrAntiClockWise(image, true);
+
         }
         sendMessageToService(packageName, AppLockerService.MSG_APP_LOCK);
         // Log.e("locker", "locked");
@@ -85,7 +116,7 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
     private void appUnlocked(View view, String packageName) throws ClassCastException {
         if (view != null) {
             ImageView image = (ImageView) view;
-            image.setImageDrawable(getResources().getDrawable(R.mipmap.lock_open));
+            clockWiseOrAntiClockWise(image, false);
         }
         sendMessageToService(packageName, AppLockerService.MSG_APP_UNLOCK);
         // Log.e("locker", "unlocked");

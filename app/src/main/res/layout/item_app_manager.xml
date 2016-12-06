@@ -35,7 +35,7 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:layout_gravity="center_vertical"
-        android:padding="@dimen/icon_margin"
+        android:padding="15dp"
         android:src="@mipmap/locker" />
 
 
