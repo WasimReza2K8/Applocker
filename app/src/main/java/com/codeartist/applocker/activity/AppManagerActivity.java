@@ -50,9 +50,11 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_manager);
-      /*  mAllAppsButton = (Button) findViewById(R.id.button_allApp);
-        mLockAppsButton = (Button) findViewById(R.id.button_lockApp);
-        mPaidAppsButton = (Button) findViewById(R.id.button_paidApp);*/
+        /*
+         * mAllAppsButton = (Button) findViewById(R.id.button_allApp); mLockAppsButton = (Button)
+         * findViewById(R.id.button_lockApp); mPaidAppsButton = (Button)
+         * findViewById(R.id.button_paidApp);
+         */
         mAppListView = (ListView) findViewById(R.id.listView_appManager);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar_AppList);
         mAdapter = new AppManagerAdapter(this, mClickListener);
@@ -72,11 +74,11 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
         bindService(new Intent(this, AppLockerService.class), mConnection,
                 BIND_AUTO_CREATE);
         new GetApplication().execute();
-     //   addShortcut();
+        // addShortcut();
     }
 
-    public void clockWiseOrAntiClockWise(final ImageView image, final boolean isLocked){
-        int anim = isLocked ? R.anim.rotate_clock_wise: R.anim.rotate_anti_clock_wise;
+    public void clockWiseOrAntiClockWise(final ImageView image, final boolean isLocked) {
+        int anim = isLocked ? R.anim.rotate_clock_wise : R.anim.rotate_anti_clock_wise;
         Animation animation = AnimationUtils.loadAnimation(getApplicationContext(),
                 anim);
         image.startAnimation(animation);
@@ -88,9 +90,9 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                if(isLocked){
+                if (isLocked) {
                     image.setImageDrawable(getResources().getDrawable(R.mipmap.locker));
-                }else{
+                } else {
                     image.setImageDrawable(getResources().getDrawable(R.mipmap.lock_open));
                 }
 
@@ -189,8 +191,8 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
             String password = Preferences.loadString(getApplicationContext(),
                     Preferences.KEY_APP_LOCKER_PASSWORD, null);
             if (password == null) {
-              //  Intent intent = new Intent(AppManagerActivity.this, PasswordSetterActivity.class);
-                Intent intent = new Intent(AppManagerActivity.this, PatternSetterActivity.class);
+                Intent intent = new Intent(AppManagerActivity.this, PasswordSetterActivity.class);
+                // Intent intent = new Intent(AppManagerActivity.this, PatternSetterActivity.class);
                 intent.putExtra(Constants.KEY_PKG_NAME, item.getPackageName());
                 startActivityForResult(intent, REQUEST_CODE);
                 return;

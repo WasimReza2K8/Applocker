@@ -40,7 +40,7 @@ public class PasswordSetterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.pin_layout);
+      /*  setContentView(R.layout.pin_layout);
         mIndicatorDots = (IndicatorDots) findViewById(R.id.indicator_dots);
         mPinLockView = (PinLockView) findViewById(R.id.pin_lock_view);
         setPassword = (TextView) findViewById(R.id.profile_name);
@@ -49,8 +49,8 @@ public class PasswordSetterActivity extends AppCompatActivity {
 
         mPinLockView.setPinLength(6);
         mPinLockView.setTextColor(getResources().getColor(R.color.white));
-        packageName = getIntent().getStringExtra(Constants.KEY_PKG_NAME);
-    /*    setContentView(R.layout.activity_password_setter);
+        packageName = getIntent().getStringExtra(Constants.KEY_PKG_NAME);*/
+        setContentView(R.layout.activity_password_setter);
         final EditText password = (EditText) findViewById(R.id.editText_password);
         final TextView setPassword = (TextView) findViewById(R.id.textView_setPassword);
         Button check = (Button) findViewById(R.id.button_check);
@@ -81,7 +81,7 @@ public class PasswordSetterActivity extends AppCompatActivity {
                     }
                 }
             }
-        });*/
+        });
     }
 
     private PinLockListener mPinLockListener = new PinLockListener() {

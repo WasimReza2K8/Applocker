@@ -16,7 +16,10 @@ import com.takwolf.android.lock9.Lock9View;
 
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.app.Dialog;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -29,6 +32,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.SystemClock;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -134,9 +139,49 @@ public class AppLockerService extends Service {
         mHomeWatcher.startWatch();
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        registerReceiver(mScreenOnOffReceiver, filter);
+        startForeground(0, createNotification());
+        restartService(60 * 60 * 1000, true);
         // Log.e("activity on TOp", "" + "onCreate");
         // Toast.makeText(getApplicationContext(), "service onCreate! ", Toast.LENGTH_SHORT).show();
+    }
+
+    private Notification createNotification() {
+        Intent nextIntent = new Intent(this, AppLockerService.class);
+        // nextIntent.setAction(Constants.ACTION.NEXT_ACTION);
+        PendingIntent pnextIntent = PendingIntent.getService(this, 0,
+                nextIntent, 0);
+        NotificationCompat.Builder notificationI = new NotificationCompat.Builder(this)
+                .setContentTitle(getString(R.string.app_name))
+                .setTicker(getString(R.string.app_name))
+                .setContentText(getString(R.string.app_name))
+                .setAutoCancel(true)
+                .setContentIntent(pnextIntent);
+
+        /*
+         * Notification notification = notificationI.build(); notification.priority =
+         * Notification.PRIORITY_MIN;
+         */
+        // notification.visibility = Notification.VISIBILITY_SECRET;
+        // notification.setLatestEventInfo( this, title, text, contentIntent );
+        Notification notification = notificationI.build();
+        notification.priority = Notification.PRIORITY_MIN;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            int smallIconViewId = getResources().getIdentifier("right_icon", "id",
+                    android.R.class.getPackage().getName());
+
+            if (smallIconViewId != 0) {
+                if (notification.contentIntent != null)
+                    notification.contentView.setViewVisibility(smallIconViewId, View.INVISIBLE);
+
+                if (notification.headsUpContentView != null)
+                    notification.headsUpContentView.setViewVisibility(smallIconViewId,
+                            View.INVISIBLE);
+
+                if (notification.bigContentView != null)
+                    notification.bigContentView.setViewVisibility(smallIconViewId, View.INVISIBLE);
+            }
+        }
+        return notification;
     }
 
     @Override
@@ -169,6 +214,33 @@ public class AppLockerService extends Service {
         }
     }
 
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        restartService(1000, false);
+        super.onTaskRemoved(rootIntent);
+    }
+
+    private void restartService(int interval, boolean isRepeating) {
+        Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
+        restartServiceIntent.setPackage(getPackageName());
+
+        PendingIntent restartServicePendingIntent = PendingIntent.getService(
+                getApplicationContext(), 1, restartServiceIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager alarmService = (AlarmManager) getApplicationContext()
+                .getSystemService(Context.ALARM_SERVICE);
+        if (isRepeating) {
+            alarmService.setRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime(),
+                    interval, restartServicePendingIntent);
+        } else {
+            alarmService.set(
+                    AlarmManager.ELAPSED_REALTIME,
+                    SystemClock.elapsedRealtime() + interval,
+                    restartServicePendingIntent);
+        }
+
+    }
+
     private void scheduleMethod() {
         // Log.e("schdule task", mTimer + "");
         removeScheduleTask();
@@ -181,7 +253,7 @@ public class AppLockerService extends Service {
                 // This method will check for the Running apps after every 500ms
                 checkRunningApps();
             }
-        }, 0, 300);
+        }, 0, 150);
 
     }
 
@@ -189,8 +261,8 @@ public class AppLockerService extends Service {
         public void handleMessage(Message msg) {
             String packageName = (String) msg.obj;
             // Log.e("mHandler", packageName + "");
-            //showCheckerDialog(packageName);
-             showPatternDialog(packageName);
+            showCheckerDialog(packageName);
+            // showPatternDialog(packageName);
             removeScheduleTask();
         }
     };
@@ -327,7 +399,8 @@ public class AppLockerService extends Service {
 
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    InputMethodManager imm = (InputMethodManager) getSystemService(
+                            Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
                     return true;
                 }
@@ -432,23 +505,16 @@ public class AppLockerService extends Service {
              * } } });
              */
 
-          /*  pattern.setOnPatternDetectedListener(new PatternView.OnPatternDetectedListener() {
-                @Override
-                public void onPatternDetected() {
-                    String savedPassword = Preferences.loadString(getApplicationContext(),
-                            Preferences.KEY_APP_LOCKER_PASSWORD, null);
-                    if (savedPassword != null && pattern.getPatternString() != null
-                            && pattern.getPatternString().equals(savedPassword)) {
-                        destroyDialog();
-                        activityList.remove(packageName);
-                        scheduleMethod();
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Wrong Password",
-                                Toast.LENGTH_LONG).show();
-                    }
-
-                }
-            });*/
+            /*
+             * pattern.setOnPatternDetectedListener(new PatternView.OnPatternDetectedListener() {
+             * @Override public void onPatternDetected() { String savedPassword =
+             * Preferences.loadString(getApplicationContext(), Preferences.KEY_APP_LOCKER_PASSWORD,
+             * null); if (savedPassword != null && pattern.getPatternString() != null &&
+             * pattern.getPatternString().equals(savedPassword)) { destroyDialog();
+             * activityList.remove(packageName); scheduleMethod(); } else {
+             * Toast.makeText(getApplicationContext(), "Wrong Password", Toast.LENGTH_LONG).show();
+             * } } });
+             */
 
             pattern.setCallBack(new Lock9View.CallBack() {
                 @Override
@@ -474,7 +540,7 @@ public class AppLockerService extends Service {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
+
         // Log.e("activity on TOp", "" + "onDestroy");
         removeScheduleTask();
         if (mScreenOnOffReceiver != null) {
@@ -483,7 +549,10 @@ public class AppLockerService extends Service {
         if (mHomeWatcher != null) {
             mHomeWatcher.stopWatch();
         }
+        stopForeground(true);
         destroyDialog();
+        restartService(1000, false);
+        super.onDestroy();
 
     }
 

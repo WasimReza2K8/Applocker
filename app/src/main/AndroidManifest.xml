@@ -37,8 +37,17 @@
 
         <service
             android:name="com.codeartist.applocker.service.AppLockerService"
-            android:process="com.codeartist.applocker.alive_process"
-            android:exported="false"></service>
+            android:exported="false"
+            android:enabled="true">
+        </service>
+
+        <receiver android:name=".receiver.ExpiredReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+
+            </intent-filter>
+
+        </receiver>
     </application>
 
 </manifest>
