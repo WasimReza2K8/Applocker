@@ -33,6 +33,7 @@ public class Constants {
     public static final String KEY_SCAN_TYPE = "scan_type";
     public static final String KEY_RESULT_LIST = "result list";
     public static final String KEY_PKG_NAME = "pkg Name";
+    public static final String KEY_CLOSE_DIALOG = "close_dialog";
     public static final String KEY_ERROR_MSG = "error msg";
     public static final String STB_STATUS_RECEIVER_INTENT_FILTER = "stb_status_receiver_intent_filter";
 

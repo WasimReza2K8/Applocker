@@ -13,18 +13,10 @@ import android.util.Log;
  */
 public class ExpiredReceiver extends BroadcastReceiver{
 
-    private Context mContext;
-
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (context == null) {
-            return;
-        }
-
-        mContext = context;
-
         Log.d("ExpiredReceiver", "Expired Receiver fired");
-        mContext.startService(new Intent(mContext, AppLockerService.class));
+        context.startService(new Intent(context, AppLockerService.class));
     }
 
 }

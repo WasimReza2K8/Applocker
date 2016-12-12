@@ -2,8 +2,10 @@
 package com.codeartist.applocker.service;
 
 import java.util.List;
+import java.util.SortedMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeMap;
 
 import com.codeartist.applocker.R;
 import com.codeartist.applocker.db.DBManager;
@@ -21,6 +23,8 @@ import android.app.Dialog;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -139,11 +143,29 @@ public class AppLockerService extends Service {
         mHomeWatcher.startWatch();
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(mScreenOnOffReceiver, filter);
         startForeground(0, createNotification());
         restartService(60 * 60 * 1000, true);
         // Log.e("activity on TOp", "" + "onCreate");
         // Toast.makeText(getApplicationContext(), "service onCreate! ", Toast.LENGTH_SHORT).show();
     }
+
+    private Thread closeDialog = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(500);
+                Message msg = Message.obtain(); // Creates an new Message instance
+                msg.obj = Constants.KEY_CLOSE_DIALOG; // Put the string into Message, into "obj"
+                // field.
+                msg.setTarget(mHandler); // Set the Handler
+                msg.sendToTarget();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    });
+
 
     private Notification createNotification() {
         Intent nextIntent = new Intent(this, AppLockerService.class);
@@ -196,11 +218,11 @@ public class AppLockerService extends Service {
             // Log.i("[BroadcastReceiver]", "MyReceiver");
 
             if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-                // Log.i("[BroadcastReceiver]", "Onnn");
+                 Log.i("[BroadcastReceiver]", "Onnn");
                 activityList = Utils.getLockedApp(mDb);
                 scheduleMethod();
             } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-                // Log.i("[BroadcastReceiver]", "OFF");
+                 Log.i("[BroadcastReceiver]", "OFF");
                 removeScheduleTask();
             }
         }
@@ -275,17 +297,40 @@ public class AppLockerService extends Service {
         ActivityManager mActivityManager = (ActivityManager) getSystemService(
                 Context.ACTIVITY_SERVICE);
 
-        String activityOnTop;
+        String activityOnTop = null;
 
-        if (Build.VERSION.SDK_INT > 20) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            // intentionally using string value as Context.USAGE_STATS_SERVICE was
+            // strangely only added in API 22 (LOLLIPOP_MR1)
+            @SuppressWarnings("WrongConstant")
+            UsageStatsManager usm = (UsageStatsManager) getSystemService("usagestats");
+            long time = System.currentTimeMillis();
+            List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,
+                    time - 1000 * 1000, time);
+            if (appList != null && appList.size() > 0) {
+                SortedMap<Long, UsageStats> mySortedMap = new TreeMap<>();
+                for (UsageStats usageStats : appList) {
+                    mySortedMap.put(usageStats.getLastTimeUsed(),
+                            usageStats);
+                }
+                if (mySortedMap != null && !mySortedMap.isEmpty()) {
+                    activityOnTop = mySortedMap.get(
+                            mySortedMap.lastKey()).getPackageName();
+                }
+            }
+        } else {
+           // activityOnTop = mActivityManager.getRunningAppProcesses().get(0).processName;
+            activityOnTop = mActivityManager.getRunningTasks(1).get(0).topActivity.getPackageName();
+        }
+     /*   if (Build.VERSION.SDK_INT > 20) {
             activityOnTop = mActivityManager.getRunningAppProcesses().get(0).processName;
         } else {
             activityOnTop = mActivityManager.getRunningTasks(1).get(0).topActivity.getPackageName();
-        }
+        }*/
         Log.e("activity on TOp", "" + activityOnTop);
 
         // Provide the package name(s) of apps here, you want to show password activity
-        if (activityList.contains(activityOnTop)) {
+        if (activityOnTop != null && activityList.contains(activityOnTop)) {
             Message msg = Message.obtain(); // Creates an new Message instance
             msg.obj = activityOnTop; // Put the string into Message, into "obj" field.
             msg.setTarget(mHandler); // Set the Handler
