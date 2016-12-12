@@ -154,7 +154,7 @@ public class AppLockerService extends Service {
         @Override
         public void run() {
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
                 Message msg = Message.obtain(); // Creates an new Message instance
                 msg.obj = Constants.KEY_CLOSE_DIALOG; // Put the string into Message, into "obj"
                 // field.
@@ -283,6 +283,11 @@ public class AppLockerService extends Service {
         public void handleMessage(Message msg) {
             String packageName = (String) msg.obj;
             // Log.e("mHandler", packageName + "");
+            if (packageName.equals(Constants.KEY_CLOSE_DIALOG)) {
+                destroyDialog();
+                scheduleMethod();
+                return;
+            }
             showCheckerDialog(packageName);
             // showPatternDialog(packageName);
             removeScheduleTask();
@@ -471,8 +476,13 @@ public class AppLockerService extends Service {
                         startMain.addCategory(Intent.CATEGORY_HOME);
                         startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(startMain);
-                        destroyDialog();
-                        scheduleMethod();
+                       /* destroyDialog();
+                        scheduleMethod();*/
+                        if (closeDialog.getState() == Thread.State.NEW) {
+                            closeDialog.start();
+                        }else{
+                            closeDialog.run();
+                        }
                         return true;
 
                     }
@@ -487,9 +497,15 @@ public class AppLockerService extends Service {
                             Preferences.KEY_APP_LOCKER_PASSWORD, null);
                     if (savedPassword != null && password.getText().toString() != null
                             && password.getText().toString().equals(savedPassword)) {
-                        destroyDialog();
+                        if (closeDialog.getState() == Thread.State.NEW) {
+                            closeDialog.start();
+                        }else{
+                            closeDialog.run();
+                        }
+                      /*  destroyDialog();
+                        scheduleMethod();*/
                         activityList.remove(packageName);
-                        scheduleMethod();
+
                     } else {
                         Toast.makeText(getApplicationContext(), "Wrong Password",
                                 Toast.LENGTH_LONG).show();
