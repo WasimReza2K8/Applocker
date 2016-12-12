@@ -85,6 +85,8 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
         }
     }
 
+    //
+
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private boolean isPermittedToLollipop(){
         try {
