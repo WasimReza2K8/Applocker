@@ -41,7 +41,7 @@ import android.widget.ProgressBar;
  */
 
 public final class AppManagerActivity extends BaseServiceBinderActivity {
-    private Button mAllAppsButton, mLockAppsButton, mPaidAppsButton;
+   // private Button mAllAppsButton, mLockAppsButton, mPaidAppsButton;
     private ListView mAppListView;
     private List<AppManagerModel> mAppList;
     private ProgressBar mProgressBar;
