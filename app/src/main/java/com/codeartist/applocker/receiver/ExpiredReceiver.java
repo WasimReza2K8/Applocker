@@ -16,10 +16,10 @@ public class ExpiredReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("ExpiredReceiver", "Expired Receiver fired");
-        if (!isProcessRunning(context)) {
+        Log.d("activity on TOp", "Expired Receiver fired");
+        if (!isProcessRunning(context) || !isMyServiceRunning(AppLockerService.class, context)) {
             context.stopService(new Intent(context, AppLockerService.class));
-            // context.startService(new Intent(context, AppLockerService.class));
+            context.startService(new Intent(context, AppLockerService.class));
         }
 
     }
@@ -36,6 +36,18 @@ public class ExpiredReceiver extends BroadcastReceiver {
 
         return false;
 
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass, Context context) {
+        ActivityManager manager = (ActivityManager) context
+                .getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager
+                .getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

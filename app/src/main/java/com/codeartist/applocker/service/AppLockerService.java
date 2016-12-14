@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import com.codeartist.applocker.R;
 import com.codeartist.applocker.db.DBManager;
 import com.codeartist.applocker.interfaces.OnHomePressedListener;
+import com.codeartist.applocker.receiver.ExpiredReceiver;
 import com.codeartist.applocker.utility.Constants;
 import com.codeartist.applocker.utility.HomeWatcher;
 import com.codeartist.applocker.utility.Preferences;
@@ -36,7 +37,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.Gravity;
@@ -130,24 +130,44 @@ public class AppLockerService extends Service {
         mHomeWatcher.setOnHomePressedListener(new OnHomePressedListener() {
             @Override
             public void onHomePressed() {
-                destroyDialog();
-                scheduleMethod();
+                goToHomeScreen();
+                if (closeDialog.getState() == Thread.State.NEW) {
+                    closeDialog.start();
+                } else {
+                    closeDialog.run();
+                }
             }
 
             @Override
             public void onHomeLongPressed() {
-                destroyDialog();
-                scheduleMethod();
+               // goToHomeScreen();
+                if (closeDialog.getState() == Thread.State.NEW) {
+                    closeDialog.start();
+                } else {
+                    closeDialog.run();
+                }
             }
         });
         mHomeWatcher.startWatch();
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         registerReceiver(mScreenOnOffReceiver, filter);
+        IntentFilter filterClock = new IntentFilter();
+        filterClock.addAction(Intent.ACTION_TIME_TICK);
+        filterClock.addAction(Intent.ACTION_TIME_CHANGED);
+        filterClock.addAction(Intent.ACTION_TIMEZONE_CHANGED);
+        registerReceiver(mTimeChangedReceiver, filterClock);
         startForeground(0, createNotification());
         restartService(60 * 60 * 1000, true);
         // Log.e("activity on TOp", "" + "onCreate");
         // Toast.makeText(getApplicationContext(), "service onCreate! ", Toast.LENGTH_SHORT).show();
+    }
+
+    private void goToHomeScreen() {
+        Intent startMain = new Intent(Intent.ACTION_MAIN);
+        startMain.addCategory(Intent.CATEGORY_HOME);
+        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(startMain);
     }
 
     private Thread closeDialog = new Thread(new Runnable() {
@@ -165,7 +185,6 @@ public class AppLockerService extends Service {
             }
         }
     });
-
 
     private Notification createNotification() {
         Intent nextIntent = new Intent(this, AppLockerService.class);
@@ -209,6 +228,7 @@ public class AppLockerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Log.e("activity on TOp", "" + "onStartCommand");
+        super.onStartCommand(intent, Service.START_FLAG_REDELIVERY, startId);
         return START_STICKY;
     }
 
@@ -218,13 +238,22 @@ public class AppLockerService extends Service {
             // Log.i("[BroadcastReceiver]", "MyReceiver");
 
             if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-                 Log.i("[BroadcastReceiver]", "Onnn");
+                Log.i("[BroadcastReceiver]", "Onnn");
                 activityList = Utils.getLockedApp(mDb);
                 scheduleMethod();
             } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-                 Log.i("[BroadcastReceiver]", "OFF");
+                Log.i("[BroadcastReceiver]", "OFF");
                 removeScheduleTask();
             }
+        }
+    };
+
+    private BroadcastReceiver mTimeChangedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.e("activity on TOp", "............time changed........");
+            scheduleMethod();
+            // restartService(3000, false);
         }
     };
 
@@ -243,21 +272,23 @@ public class AppLockerService extends Service {
     }
 
     private void restartService(int interval, boolean isRepeating) {
-        Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
+        // stopSelf();
+        Log.e("activity on TOp", "restart service");
+        Intent restartServiceIntent = new Intent(getApplicationContext(), ExpiredReceiver.class);
         restartServiceIntent.setPackage(getPackageName());
 
-        PendingIntent restartServicePendingIntent = PendingIntent.getService(
+        PendingIntent restartServicePendingIntent = PendingIntent.getBroadcast(
                 getApplicationContext(), 1, restartServiceIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmService = (AlarmManager) getApplicationContext()
                 .getSystemService(Context.ALARM_SERVICE);
         if (isRepeating) {
-            alarmService.setRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime(),
+            alarmService.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
                     interval, restartServicePendingIntent);
         } else {
             alarmService.set(
                     AlarmManager.ELAPSED_REALTIME,
-                    SystemClock.elapsedRealtime() + interval,
+                    System.currentTimeMillis() + interval,
                     restartServicePendingIntent);
         }
 
@@ -283,7 +314,7 @@ public class AppLockerService extends Service {
         public void handleMessage(Message msg) {
             String packageName = (String) msg.obj;
             // Log.e("mHandler", packageName + "");
-            if (packageName.equals(Constants.KEY_CLOSE_DIALOG)) {
+            if (String.valueOf(packageName) == Constants.KEY_CLOSE_DIALOG) {
                 destroyDialog();
                 scheduleMethod();
                 return;
@@ -324,14 +355,14 @@ public class AppLockerService extends Service {
                 }
             }
         } else {
-           // activityOnTop = mActivityManager.getRunningAppProcesses().get(0).processName;
+            // activityOnTop = mActivityManager.getRunningAppProcesses().get(0).processName;
             activityOnTop = mActivityManager.getRunningTasks(1).get(0).topActivity.getPackageName();
         }
-     /*   if (Build.VERSION.SDK_INT > 20) {
-            activityOnTop = mActivityManager.getRunningAppProcesses().get(0).processName;
-        } else {
-            activityOnTop = mActivityManager.getRunningTasks(1).get(0).topActivity.getPackageName();
-        }*/
+        /*
+         * if (Build.VERSION.SDK_INT > 20) { activityOnTop =
+         * mActivityManager.getRunningAppProcesses().get(0).processName; } else { activityOnTop =
+         * mActivityManager.getRunningTasks(1).get(0).topActivity.getPackageName(); }
+         */
         Log.e("activity on TOp", "" + activityOnTop);
 
         // Provide the package name(s) of apps here, you want to show password activity
@@ -472,15 +503,13 @@ public class AppLockerService extends Service {
                         KeyEvent event) {
 
                     if (keyCode == KeyEvent.KEYCODE_BACK) {
-                        Intent startMain = new Intent(Intent.ACTION_MAIN);
-                        startMain.addCategory(Intent.CATEGORY_HOME);
-                        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(startMain);
-                       /* destroyDialog();
-                        scheduleMethod();*/
+                        goToHomeScreen();
+                        /*
+                         * destroyDialog(); scheduleMethod();
+                         */
                         if (closeDialog.getState() == Thread.State.NEW) {
                             closeDialog.start();
-                        }else{
+                        } else {
                             closeDialog.run();
                         }
                         return true;
@@ -499,11 +528,12 @@ public class AppLockerService extends Service {
                             && password.getText().toString().equals(savedPassword)) {
                         if (closeDialog.getState() == Thread.State.NEW) {
                             closeDialog.start();
-                        }else{
+                        } else {
                             closeDialog.run();
                         }
-                      /*  destroyDialog();
-                        scheduleMethod();*/
+                        /*
+                         * destroyDialog(); scheduleMethod();
+                         */
                         activityList.remove(packageName);
 
                     } else {
@@ -602,11 +632,16 @@ public class AppLockerService extends Service {
     @Override
     public void onDestroy() {
 
-        // Log.e("activity on TOp", "" + "onDestroy");
+        Log.e("activity on TOp", "" + "onDestroy");
         removeScheduleTask();
         if (mScreenOnOffReceiver != null) {
             unregisterReceiver(mScreenOnOffReceiver);
         }
+
+        if (mTimeChangedReceiver != null) {
+            unregisterReceiver(mTimeChangedReceiver);
+        }
+
         if (mHomeWatcher != null) {
             mHomeWatcher.stopWatch();
         }

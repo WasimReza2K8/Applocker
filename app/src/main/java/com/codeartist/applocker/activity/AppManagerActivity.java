@@ -83,6 +83,23 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
                 startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
             }
         }
+
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            checkDrawOverlayPermission();
+        }
+    }
+
+    public final static int REQUEST_CODE_OVERLAY = -1010101; /*(see edit II)*/
+
+    public void checkDrawOverlayPermission() {
+        /** check if we already  have permission to draw over other apps */
+        if (!Settings.canDrawOverlays(this)) {
+            /** if not construct intent to request permission */
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            /** request permission via start activity for result */
+            startActivityForResult(intent, REQUEST_CODE);
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -200,6 +217,8 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
                     }
                 }
             }
+        } else if(requestCode == REQUEST_CODE_OVERLAY){
+
         }
     }
 
