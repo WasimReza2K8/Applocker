@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.Gravity;
@@ -124,9 +125,19 @@ public class AppLockerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        boolean isScreenOn;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            isScreenOn = pm.isInteractive();
+        } else {
+            isScreenOn = pm.isScreenOn();
+        }
+
         mDb = DBManager.getInstance(getApplicationContext());
         activityList = Utils.getLockedApp(mDb);
-        scheduleMethod();
+        if (isScreenOn) {
+            scheduleMethod();
+        }
         mHomeWatcher.setOnHomePressedListener(new OnHomePressedListener() {
             @Override
             public void onHomePressed() {
@@ -140,7 +151,7 @@ public class AppLockerService extends Service {
 
             @Override
             public void onHomeLongPressed() {
-               // goToHomeScreen();
+                // goToHomeScreen();
                 if (closeDialog.getState() == Thread.State.NEW) {
                     closeDialog.start();
                 } else {
@@ -158,7 +169,7 @@ public class AppLockerService extends Service {
         filterClock.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         registerReceiver(mTimeChangedReceiver, filterClock);
         startForeground(0, createNotification());
-        restartService(60 * 60 * 1000, true);
+        // restartService(60 * 60 * 1000, true);
         // Log.e("activity on TOp", "" + "onCreate");
         // Toast.makeText(getApplicationContext(), "service onCreate! ", Toast.LENGTH_SHORT).show();
     }
@@ -252,7 +263,17 @@ public class AppLockerService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.e("activity on TOp", "............time changed........");
-            scheduleMethod();
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            boolean isScreenOn;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                isScreenOn = pm.isInteractive();
+            } else {
+                isScreenOn = pm.isScreenOn();
+            }
+
+            if (isScreenOn) {
+                scheduleMethod();
+            }
             // restartService(3000, false);
         }
     };
@@ -646,7 +667,7 @@ public class AppLockerService extends Service {
             mHomeWatcher.stopWatch();
         }
         stopForeground(true);
-        destroyDialog();
+        // destroyDialog();
         restartService(1000, false);
         super.onDestroy();
 
