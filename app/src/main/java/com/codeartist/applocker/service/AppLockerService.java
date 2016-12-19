@@ -508,7 +508,7 @@ public class AppLockerService extends Service {
                 }
 
             });
-            checkerDialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+            checkerDialog = new Dialog(context, R.style.DialogTheme);
             checkerDialog.setCanceledOnTouchOutside(false);
             checkerDialog.setCancelable(false);
             checkerDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_PHONE);
