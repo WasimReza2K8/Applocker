@@ -667,7 +667,7 @@ public class AppLockerService extends Service {
             mHomeWatcher.stopWatch();
         }
         stopForeground(true);
-        // destroyDialog();
+        destroyDialog();
         restartService(1000, false);
         super.onDestroy();
 
