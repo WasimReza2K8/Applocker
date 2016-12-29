@@ -27,11 +27,13 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -41,7 +43,7 @@ import android.widget.ProgressBar;
  */
 
 public final class AppManagerActivity extends BaseServiceBinderActivity {
-   // private Button mAllAppsButton, mLockAppsButton, mPaidAppsButton;
+    // private Button mAllAppsButton, mLockAppsButton, mPaidAppsButton;
     private ListView mAppListView;
     private List<AppManagerModel> mAppList;
     private ProgressBar mProgressBar;
@@ -79,7 +81,7 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
         new GetApplication().execute();
         // addShortcut();
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            if(!isPermittedToLollipop()){
+            if (!isPermittedToLollipop()) {
                 startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
             }
         }
@@ -89,10 +91,10 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
         }
     }
 
-    public final static int REQUEST_CODE_OVERLAY = -1010101; /*(see edit II)*/
+    public final static int REQUEST_CODE_OVERLAY = -1010101; /* (see edit II) */
 
     public void checkDrawOverlayPermission() {
-        /** check if we already  have permission to draw over other apps */
+        /** check if we already have permission to draw over other apps */
         if (!Settings.canDrawOverlays(this)) {
             /** if not construct intent to request permission */
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -103,12 +105,14 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private boolean isPermittedToLollipop(){
+    private boolean isPermittedToLollipop() {
         try {
             PackageManager packageManager = getPackageManager();
-            ApplicationInfo applicationInfo = packageManager.getApplicationInfo(getPackageName(), 0);
+            ApplicationInfo applicationInfo = packageManager.getApplicationInfo(getPackageName(),
+                    0);
             AppOpsManager appOpsManager = (AppOpsManager) getSystemService(APP_OPS_SERVICE);
-            int mode = appOpsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, applicationInfo.uid, applicationInfo.packageName);
+            int mode = appOpsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
+                    applicationInfo.uid, applicationInfo.packageName);
             return (mode == AppOpsManager.MODE_ALLOWED);
 
         } catch (PackageManager.NameNotFoundException e) {
@@ -185,6 +189,25 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     public void sendMessageToService(String packageName, int lockFlag) {
         // Log.e("locker", mBound + "");
         if (!mBound)
@@ -217,7 +240,7 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
                     }
                 }
             }
-        } else if(requestCode == REQUEST_CODE_OVERLAY){
+        } else if (requestCode == REQUEST_CODE_OVERLAY) {
 
         }
     }

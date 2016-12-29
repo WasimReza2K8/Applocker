@@ -6,8 +6,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.GET_TASKS" />
-    <uses-permission
-        android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
     <uses-permission
         android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
@@ -18,7 +17,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.codeartist.applocker.activity.AppManagerActivity"
+        <activity
+            android:name="com.codeartist.applocker.activity.AppManagerActivity"
             android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,17 +29,22 @@
 
         <activity
             android:name="com.codeartist.applocker.activity.PasswordSetterActivity"
+            android:excludeFromRecents="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.AppCompat.NoActionBar"/>
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <activity
             android:name="com.codeartist.applocker.activity.PatternSetterActivity"
+            android:excludeFromRecents="true"
+            android:label="@string/app_name" />
+        <activity
+            android:name="com.codeartist.applocker.activity.SettingsActivity"
+            android:excludeFromRecents="true"
             android:label="@string/app_name" />
 
         <service
             android:name="com.codeartist.applocker.service.AppLockerService"
-            android:exported="false">
-        </service>
+            android:exported="false"></service>
 
         <receiver android:name=".receiver.ExpiredReceiver">
             <intent-filter>

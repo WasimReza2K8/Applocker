@@ -40,7 +40,7 @@ public class PasswordSetterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-      /*  setContentView(R.layout.pin_layout);
+      /*  setContentView(R.layout.PatternView);
         mIndicatorDots = (IndicatorDots) findViewById(R.id.indicator_dots);
         mPinLockView = (PinLockView) findViewById(R.id.pin_lock_view);
         setPassword = (TextView) findViewById(R.id.profile_name);

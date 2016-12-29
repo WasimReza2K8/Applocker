@@ -24,7 +24,7 @@ public class PatternSetterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.pattern_lock_layout);
+        setContentView(R.layout.pattern_lock_option);
         final String packageName = getIntent().getStringExtra(Constants.KEY_PKG_NAME);
         final Lock9View lock9View = (Lock9View) findViewById(R.id.lock_9_view);
         lock9View.setCallBack(new Lock9View.CallBack() {
