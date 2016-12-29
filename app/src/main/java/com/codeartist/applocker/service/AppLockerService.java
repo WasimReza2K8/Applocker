@@ -321,6 +321,7 @@ public class AppLockerService extends Service {
         removeScheduleTask();
         mTimer = new Timer();
         // Log.e("activity on TOp", "" + "scheduleMethod");
+        int timeInterval = Preferences.loadInt(this, Constants.KEY_LOCKER_ACCURACY, 200);
 
         mTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -328,7 +329,7 @@ public class AppLockerService extends Service {
                 // This method will check for the Running apps after every 500ms
                 checkRunningApps();
             }
-        }, 0, 150);
+        }, 0, timeInterval);
 
     }
 
@@ -341,9 +342,16 @@ public class AppLockerService extends Service {
                 scheduleMethod();
                 return;
             }
-            // showCheckerDialog(packageName);
+            int lockType = Preferences.loadInt(getApplicationContext(), Constants.KEY_LOCKER_TYPE,
+                    1);
+            if (lockType == 1) {
+                showPatternDialogOption(packageName);
+            } else {
+                showCheckerDialog(packageName);
+            }
+
             // showPatternDialog(packageName);
-            showPatternDialogOption(packageName);
+
             removeScheduleTask();
         }
     };

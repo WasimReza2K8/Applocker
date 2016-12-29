@@ -4,6 +4,7 @@ package com.codeartist.applocker.activity;
 import com.codeartist.applocker.R;
 import com.codeartist.applocker.utility.Constants;
 import com.codeartist.applocker.utility.Preferences;
+import com.eftimoff.patternview.PatternView;
 import com.takwolf.android.lock9.Lock9View;
 
 import android.app.Activity;
@@ -26,14 +27,17 @@ public class PatternSetterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pattern_lock_option);
         final String packageName = getIntent().getStringExtra(Constants.KEY_PKG_NAME);
-        final Lock9View lock9View = (Lock9View) findViewById(R.id.lock_9_view);
-        lock9View.setCallBack(new Lock9View.CallBack() {
+        final PatternView pattern = (PatternView) findViewById(R.id.patternView);
+        pattern.setOnPatternDetectedListener(new PatternView.OnPatternDetectedListener() {
             @Override
-            public void onFinish(String password) {
+            public void onPatternDetected() {
+                String password = pattern.getPatternString();
                 if (patternString == null) {
                     patternString = password;
+                    pattern.clearPattern();
                     return;
                 }
+
                 if (patternString.equals(password)) {
                     //Toast.makeText(getApplicationContext(), "PATTERN CORRECT", Toast.LENGTH_SHORT).show();
                     Preferences.save(getApplicationContext(),
@@ -48,30 +52,15 @@ public class PatternSetterActivity extends AppCompatActivity {
 //                patternView.clearPattern();
             }
         });
-       /* materialLockView.setOnPatternListener(new MaterialLockView.OnPatternListener() {
+       /* final Lock9View lock9View = (Lock9View) findViewById(R.id.lock_9_view);
+        lock9View.setCallBack(new Lock9View.CallBack() {
             @Override
-            public void onPatternDetected(List<MaterialLockView.Cell> pattern,
-                    String SimplePattern) {
-                Preferences.save(getApplicationContext(),
-                        Preferences.KEY_APP_LOCKER_PASSWORD, SimplePattern);
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra(Constants.KEY_PKG_NAME, packageName);
-                setResult(Activity.RESULT_OK, resultIntent);
-                finish();
-                super.onPatternDetected(pattern, SimplePattern);
-            }
-        });*/
-
-       /* materialLockView.setOnPatternDetectedListener(new PatternView.OnPatternDetectedListener() {
-
-            @Override
-            public void onPatternDetected() {
+            public void onFinish(String password) {
                 if (patternString == null) {
-                    patternString = materialLockView.getPatternString();
-                    materialLockView.clearPattern();
+                    patternString = password;
                     return;
                 }
-                if (patternString.equals(materialLockView.getPatternString())) {
+                if (patternString.equals(password)) {
                     //Toast.makeText(getApplicationContext(), "PATTERN CORRECT", Toast.LENGTH_SHORT).show();
                     Preferences.save(getApplicationContext(),
                             Preferences.KEY_APP_LOCKER_PASSWORD, patternString);
