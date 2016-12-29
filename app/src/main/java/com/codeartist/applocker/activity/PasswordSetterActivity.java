@@ -73,6 +73,7 @@ public class PasswordSetterActivity extends AppCompatActivity {
                                 Preferences.KEY_APP_LOCKER_PASSWORD, password1);
                         Intent resultIntent = new Intent();
                         resultIntent.putExtra(Constants.KEY_PKG_NAME, packageName);
+                        resultIntent.putExtra(Constants.KEY_LOCKER_TYPE, 2);
                         setResult(Activity.RESULT_OK, resultIntent);
                         finish();
                     } else {

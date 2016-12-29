@@ -321,7 +321,8 @@ public class AppLockerService extends Service {
         removeScheduleTask();
         mTimer = new Timer();
         // Log.e("activity on TOp", "" + "scheduleMethod");
-        int timeInterval = Preferences.loadInt(this, Constants.KEY_LOCKER_ACCURACY, 200);
+        int timeInterval = Preferences.loadInt(this, Constants.KEY_LOCKER_ACCURACY,
+                Constants.ACCURACY_HIGH);
 
         mTimer.scheduleAtFixedRate(new TimerTask() {
             @Override

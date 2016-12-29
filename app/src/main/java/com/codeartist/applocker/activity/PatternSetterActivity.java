@@ -44,6 +44,7 @@ public class PatternSetterActivity extends AppCompatActivity {
                             Preferences.KEY_APP_LOCKER_PASSWORD, patternString);
                     Intent resultIntent = new Intent();
                     resultIntent.putExtra(Constants.KEY_PKG_NAME, packageName);
+                    resultIntent.putExtra(Constants.KEY_LOCKER_TYPE, 1);
                     setResult(Activity.RESULT_OK, resultIntent);
                     finish();
                     return;

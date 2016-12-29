@@ -256,11 +256,12 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
                     Preferences.KEY_APP_LOCKER_PASSWORD, null);
             if (password == null) {
                 Intent intent;
-                int lockType = Preferences.loadInt(AppManagerActivity.this, Constants.KEY_LOCKER_TYPE, 1);
-                if(lockType == 1){
+                int lockType = Preferences.loadInt(AppManagerActivity.this,
+                        Constants.KEY_LOCKER_TYPE, Constants.PATTERN_LOCK);
+                if (lockType == Constants.PATTERN_LOCK) {
                     intent = new Intent(AppManagerActivity.this, PatternSetterActivity.class);
 
-                }else{
+                } else {
                     intent = new Intent(AppManagerActivity.this, PasswordSetterActivity.class);
                 }
 
