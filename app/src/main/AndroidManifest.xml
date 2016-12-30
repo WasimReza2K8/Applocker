@@ -51,7 +51,18 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
 
             </intent-filter>
+        </receiver>
 
+        <receiver android:name=".receiver.PackageRemoveReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_INSTALL" />
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <action android:name="android.intent.action.PACKAGE_REMOVED" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.DELETE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="package" />
+            </intent-filter>
         </receiver>
     </application>
 

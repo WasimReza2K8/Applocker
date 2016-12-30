@@ -217,7 +217,7 @@ public class AppLockerService extends Service {
         // notification.visibility = Notification.VISIBILITY_SECRET;
         // notification.setLatestEventInfo( this, title, text, contentIntent );
         Notification notification = notificationI.build();
-        notification.priority = Notification.PRIORITY_MIN;
+    //    notification.priority = Notification.PRIORITY_MIN;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             int smallIconViewId = getResources().getIdentifier("right_icon", "id",
                     android.R.class.getPackage().getName());

@@ -100,7 +100,7 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                     Uri.parse("package:" + getPackageName()));
             /** request permission via start activity for result */
-            startActivityForResult(intent, REQUEST_CODE);
+            startActivityForResult(intent, REQUEST_CODE_OVERLAY);
         }
     }
 
@@ -318,6 +318,16 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
         List<ApplicationInfo> packages = getPackageManager()
                 .getInstalledApplications(PackageManager.GET_META_DATA);
         ArrayList<String> lockedApp = Utils.getLockedApp(mDb);
+        AppManagerModel install = new AppManagerModel();
+        install.setAppName("install/uninstall App");
+        install.setAppIcon(getResources().getDrawable(R.mipmap.ic_launcher));
+        install.setPackageName("com.android.packageinstaller");
+        if (lockedApp.contains("com.android.packageinstaller")) {
+            install.setLocked(true);
+        } else {
+            install.setLocked(false);
+        }
+        applicationList.add(install);
 
         for (ApplicationInfo appInfo : packages) {
             if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
