@@ -18,6 +18,7 @@ import android.app.AppOpsManager;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -27,6 +28,7 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -89,9 +91,11 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkDrawOverlayPermission();
         }
+
+
     }
 
-    public final static int REQUEST_CODE_OVERLAY = -1010101; /* (see edit II) */
+    public final static int REQUEST_CODE_OVERLAY = 101; /* (see edit II) */
 
     public void checkDrawOverlayPermission() {
         /** check if we already have permission to draw over other apps */
@@ -315,8 +319,9 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
 
     public ArrayList<AppManagerModel> getInstalledApps() {
         ArrayList<AppManagerModel> applicationList = new ArrayList<>();
-        List<ApplicationInfo> packages = getPackageManager()
-                .getInstalledApplications(PackageManager.GET_META_DATA);
+
+      /*  List<ApplicationInfo> packages = getPackageManager()
+                .getInstalledApplications(PackageManager.GET_META_DATA);*/
         ArrayList<String> lockedApp = Utils.getLockedApp(mDb);
         AppManagerModel install = new AppManagerModel();
         install.setAppName("install/uninstall App");
@@ -329,7 +334,26 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
         }
         applicationList.add(install);
 
-        for (ApplicationInfo appInfo : packages) {
+        Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> pkgAppsList = getPackageManager().queryIntentActivities( mainIntent, 0);
+        for(ResolveInfo info: pkgAppsList){
+            Log.e("apps installed", info.activityInfo.packageName + "");
+            AppManagerModel appManagerModel = new AppManagerModel();
+            appManagerModel.setAppName(info.activityInfo.loadLabel(getPackageManager()).toString());
+            appManagerModel.setAppIcon(info.activityInfo.loadIcon(getPackageManager()));
+            appManagerModel.setPackageName(info.activityInfo.packageName);
+            if (lockedApp.contains(info.activityInfo.packageName)) {
+                appManagerModel.setLocked(true);
+            } else {
+                appManagerModel.setLocked(false);
+            }
+
+            applicationList.add(appManagerModel);
+
+        }
+
+        /*for (ApplicationInfo appInfo : packages) {
             if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
                 // // Third Party Applications
                 AppManagerModel appManagerModel = new AppManagerModel();
@@ -346,7 +370,7 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
             }
 
         }
-        return applicationList;
+*/        return applicationList;
     }
 
     @Override
