@@ -39,6 +39,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.Gravity;
@@ -169,7 +170,7 @@ public class AppLockerService extends Service {
         filterClock.addAction(Intent.ACTION_TIME_CHANGED);
         filterClock.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         registerReceiver(mTimeChangedReceiver, filterClock);
-        startForeground(0, createNotification());
+        startForeground(100, createNotification());
         // restartService(60 * 60 * 1000, true);
         // Log.e("activity on TOp", "" + "onCreate");
         // Toast.makeText(getApplicationContext(), "service onCreate! ", Toast.LENGTH_SHORT).show();
@@ -207,7 +208,7 @@ public class AppLockerService extends Service {
                 .setContentTitle(getString(R.string.app_name))
                 .setTicker(getString(R.string.app_name))
                 .setContentText(getString(R.string.app_name))
-                .setAutoCancel(true)
+                .setAutoCancel(false)
                 .setContentIntent(pnextIntent);
 
         /*
@@ -217,7 +218,7 @@ public class AppLockerService extends Service {
         // notification.visibility = Notification.VISIBILITY_SECRET;
         // notification.setLatestEventInfo( this, title, text, contentIntent );
         Notification notification = notificationI.build();
-    //    notification.priority = Notification.PRIORITY_MIN;
+        //    notification.priority = Notification.PRIORITY_MIN;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             int smallIconViewId = getResources().getIdentifier("right_icon", "id",
                     android.R.class.getPackage().getName());
@@ -240,7 +241,7 @@ public class AppLockerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Log.e("activity on TOp", "" + "onStartCommand");
-        super.onStartCommand(intent, Service.START_FLAG_REDELIVERY, startId);
+        //super.onStartCommand(intent, Service.START_FLAG_REDELIVERY, startId);
         return START_STICKY;
     }
 
@@ -289,8 +290,18 @@ public class AppLockerService extends Service {
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        restartService(1000, false);
-        super.onTaskRemoved(rootIntent);
+       // restartService(1000, false);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Intent restartService = new Intent(getApplicationContext(), this.getClass());
+            restartService.setPackage(getPackageName());
+            PendingIntent restartServicePI = PendingIntent.getService(getApplicationContext(), 1,
+                    restartService, PendingIntent.FLAG_ONE_SHOT);
+            AlarmManager alarmService = (AlarmManager) getApplicationContext()
+                    .getSystemService(Context.ALARM_SERVICE);
+            alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000,
+                    restartServicePI);
+        }
+       // super.onTaskRemoved(rootIntent);
     }
 
     private void restartService(int interval, boolean isRepeating) {
@@ -532,7 +543,7 @@ public class AppLockerService extends Service {
             checkerDialog.setOnKeyListener(new Dialog.OnKeyListener() {
                 @Override
                 public boolean onKey(DialogInterface dialog, int keyCode,
-                        KeyEvent event) {
+                                     KeyEvent event) {
 
                     if (keyCode == KeyEvent.KEYCODE_BACK) {
                         goToHomeScreen();
@@ -601,7 +612,7 @@ public class AppLockerService extends Service {
             checkerDialog.setOnKeyListener(new Dialog.OnKeyListener() {
                 @Override
                 public boolean onKey(DialogInterface dialog, int keyCode,
-                        KeyEvent event) {
+                                     KeyEvent event) {
 
                     if (keyCode == KeyEvent.KEYCODE_BACK) {
                         Intent startMain = new Intent(Intent.ACTION_MAIN);
@@ -681,7 +692,7 @@ public class AppLockerService extends Service {
             checkerDialog.setOnKeyListener(new Dialog.OnKeyListener() {
                 @Override
                 public boolean onKey(DialogInterface dialog, int keyCode,
-                        KeyEvent event) {
+                                     KeyEvent event) {
 
                     if (keyCode == KeyEvent.KEYCODE_BACK) {
                         Intent startMain = new Intent(Intent.ACTION_MAIN);
