@@ -12,11 +12,16 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.codeartist.applocker.R;
 import com.codeartist.applocker.db.DBManager;
+import com.codeartist.applocker.service.AppLockerService;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -27,7 +32,9 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 public final class Utils {
@@ -173,6 +180,47 @@ public final class Utils {
         };
         db.delete(DBManager.AppLocker.TABLE, where, whereArgs);
     }
+
+    public static Notification createNotification(Context context) {
+        Intent nextIntent = new Intent(context, AppLockerService.class);
+        // nextIntent.setAction(Constants.ACTION.NEXT_ACTION);
+        PendingIntent pnextIntent = PendingIntent.getService(context, 0,
+                nextIntent, 0);
+        NotificationCompat.Builder notificationI = new NotificationCompat.Builder(context)
+                .setContentTitle("")
+                .setTicker("")
+                .setContentText("")
+                .setSmallIcon(R.mipmap.blank_icon)
+                .setAutoCancel(false)
+                .setContentIntent(pnextIntent);
+
+        /*
+         * Notification notification = notificationI.build(); notification.priority =
+         * Notification.PRIORITY_MIN;
+         */
+        // notification.visibility = Notification.VISIBILITY_SECRET;
+        // notification.setLatestEventInfo( this, title, text, contentIntent );
+        Notification notification = notificationI.build();
+        notification.priority = Notification.PRIORITY_MIN;
+      /*  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            int smallIconViewId = context.getResources().getIdentifier("right_icon", "id",
+                    android.R.class.getPackage().getName());
+
+            if (smallIconViewId != 0) {
+                if (notification.contentIntent != null)
+                    notification.contentView.setViewVisibility(smallIconViewId, View.INVISIBLE);
+
+                if (notification.headsUpContentView != null)
+                    notification.headsUpContentView.setViewVisibility(smallIconViewId,
+                            View.INVISIBLE);
+
+                if (notification.bigContentView != null)
+                    notification.bigContentView.setViewVisibility(smallIconViewId, View.INVISIBLE);
+            }
+        }*/
+        return notification;
+    }
+
 
 
     public static ArrayList<String> getLockedApp(DBManager db) {

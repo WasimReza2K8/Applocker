@@ -15,7 +15,10 @@ import com.codeartist.applocker.utility.Utils;
 
 import android.app.Activity;
 import android.app.AppOpsManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -92,8 +95,17 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
             checkDrawOverlayPermission();
         }
 
+        //sendMessageToService(getPackageName(), AppLockerService.MSG_APP_LOCK_SCREEN);
+        registerReceiver(activityClose, new IntentFilter("closeActivity"));
 
     }
+
+    private BroadcastReceiver activityClose = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            finish();
+        }
+    };
 
     public final static int REQUEST_CODE_OVERLAY = 101; /* (see edit II) */
 
@@ -211,7 +223,7 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
         }
     }
 
-    @Override
+  /*  @Override
     public void sendMessageToService(String packageName, int lockFlag) {
         // Log.e("locker", mBound + "");
         if (!mBound)
@@ -226,7 +238,7 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     static final int REQUEST_CODE = 120;
 
@@ -380,5 +392,6 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
             unbindService(mConnection);
             mBound = false;
         }
+        unregisterReceiver(activityClose);
     }
 }
