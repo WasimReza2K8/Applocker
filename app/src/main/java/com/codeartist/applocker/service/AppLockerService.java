@@ -196,11 +196,6 @@ public class AppLockerService extends Service {
             try {
                 Thread.sleep(1000);
                 sendMessageToHandler(Constants.KEY_CLOSE_DIALOG);
-               /* Message msg = Message.obtain(); // Creates an new Message instance
-                msg.obj = Constants.KEY_CLOSE_DIALOG; // Put the string into Message, into "obj"
-                // field.
-                msg.setTarget(mHandler); // Set the Handler
-                msg.sendToTarget();*/
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -210,8 +205,6 @@ public class AppLockerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // Log.e("activity on TOp", "" + "onStartCommand");
-        //super.onStartCommand(intent, Service.START_FLAG_REDELIVERY, startId);
         stopService(new Intent(this, ProtectorLockService.class));
         startService(new Intent(this, ProtectorLockService.class));
         return START_STICKY;
@@ -267,7 +260,7 @@ public class AppLockerService extends Service {
         }
     }
 
-    @Override
+   /* @Override
     public void onTaskRemoved(Intent rootIntent) {
        // restartService(1000, false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -282,7 +275,7 @@ public class AppLockerService extends Service {
         }
        // super.onTaskRemoved(rootIntent);
     }
-
+*/
     private void restartService(int interval, boolean isRepeating) {
         // stopSelf();
         Log.e("activity on TOp", "restart service");
@@ -362,11 +355,6 @@ public class AppLockerService extends Service {
 
         if (activityOnTop != null && activityList.contains(activityOnTop)) {
             sendMessageToHandler(activityOnTop);
-           /* Message msg = Message.obtain(); // Creates an new Message instance
-            msg.obj = activityOnTop; // Put the string into Message, into "obj" field.
-            msg.setTarget(mHandler); // Set the Handler
-            msg.sendToTarget(); // Send the message*/
-            // mHandler.sendToTarget();
         }
     }
 
@@ -405,11 +393,6 @@ public class AppLockerService extends Service {
             // activityOnTop = mActivityManager.getRunningAppProcesses().get(0).processName;
             activityOnTop = mActivityManager.getRunningTasks(1).get(0).topActivity.getPackageName();
         }
-        /*
-         * if (Build.VERSION.SDK_INT > 20) { activityOnTop =
-         * mActivityManager.getRunningAppProcesses().get(0).processName; } else { activityOnTop =
-         * mActivityManager.getRunningTasks(1).get(0).getTopActivity.getPackageName(); }
-         */
         Log.e("activity on TOp", "" + activityOnTop);
         return activityOnTop;
     }

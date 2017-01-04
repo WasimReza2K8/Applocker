@@ -14,6 +14,7 @@ import com.codeartist.applocker.utility.Preferences;
 import com.codeartist.applocker.utility.Utils;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,8 +27,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Message;
-import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -69,7 +68,9 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar_AppList);
         mAdapter = new AppManagerAdapter(this, mClickListener);
         mAppListView.setAdapter(mAdapter);
-        startService(new Intent(this, AppLockerService.class));
+        if (!isMyServiceRunning(AppLockerService.class, this)) {
+            startService(new Intent(this, AppLockerService.class));
+        }
         mDb = DBManager.getInstance(getApplicationContext());
         mAppListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -95,9 +96,21 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
             checkDrawOverlayPermission();
         }
 
-        //sendMessageToService(getPackageName(), AppLockerService.MSG_APP_LOCK_SCREEN);
+        // sendMessageToService(getPackageName(), AppLockerService.MSG_APP_LOCK_SCREEN);
         registerReceiver(activityClose, new IntentFilter("closeActivity"));
 
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass, Context context) {
+        ActivityManager manager = (ActivityManager) context
+                .getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager
+                .getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private BroadcastReceiver activityClose = new BroadcastReceiver() {
@@ -223,22 +236,14 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
         }
     }
 
-  /*  @Override
-    public void sendMessageToService(String packageName, int lockFlag) {
-        // Log.e("locker", mBound + "");
-        if (!mBound)
-            return;
-        // Create and send a message to the service, using a supported 'what' value
-        Message msg = Message.obtain(null, lockFlag, 0, 0);
-        Bundle bundle = new Bundle();
-        bundle.putString(Constants.KEY_PKG_NAME, packageName);
-        msg.setData(bundle);
-        try {
-            mService.send(msg);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }*/
+    /*
+     * @Override public void sendMessageToService(String packageName, int lockFlag) { //
+     * Log.e("locker", mBound + ""); if (!mBound) return; // Create and send a message to the
+     * service, using a supported 'what' value Message msg = Message.obtain(null, lockFlag, 0, 0);
+     * Bundle bundle = new Bundle(); bundle.putString(Constants.KEY_PKG_NAME, packageName);
+     * msg.setData(bundle); try { mService.send(msg); } catch (RemoteException e) {
+     * e.printStackTrace(); } }
+     */
 
     static final int REQUEST_CODE = 120;
 
@@ -332,8 +337,10 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
     public ArrayList<AppManagerModel> getInstalledApps() {
         ArrayList<AppManagerModel> applicationList = new ArrayList<>();
 
-      /*  List<ApplicationInfo> packages = getPackageManager()
-                .getInstalledApplications(PackageManager.GET_META_DATA);*/
+        /*
+         * List<ApplicationInfo> packages = getPackageManager()
+         * .getInstalledApplications(PackageManager.GET_META_DATA);
+         */
         ArrayList<String> lockedApp = Utils.getLockedApp(mDb);
         AppManagerModel install = new AppManagerModel();
         install.setAppName("install/uninstall App");
@@ -348,8 +355,8 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
 
         Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        List<ResolveInfo> pkgAppsList = getPackageManager().queryIntentActivities( mainIntent, 0);
-        for(ResolveInfo info: pkgAppsList){
+        List<ResolveInfo> pkgAppsList = getPackageManager().queryIntentActivities(mainIntent, 0);
+        for (ResolveInfo info : pkgAppsList) {
             Log.e("apps installed", info.activityInfo.packageName + "");
             AppManagerModel appManagerModel = new AppManagerModel();
             appManagerModel.setAppName(info.activityInfo.loadLabel(getPackageManager()).toString());
@@ -365,24 +372,16 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
 
         }
 
-        /*for (ApplicationInfo appInfo : packages) {
-            if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
-                // // Third Party Applications
-                AppManagerModel appManagerModel = new AppManagerModel();
-                appManagerModel.setAppName(appInfo.loadLabel(getPackageManager()).toString());
-                appManagerModel.setAppIcon(appInfo.loadIcon(getPackageManager()));
-                appManagerModel.setPackageName(appInfo.packageName);
-                if (lockedApp.contains(appInfo.packageName)) {
-                    appManagerModel.setLocked(true);
-                } else {
-                    appManagerModel.setLocked(false);
-                }
-
-                applicationList.add(appManagerModel);
-            }
-
-        }
-*/        return applicationList;
+        /*
+         * for (ApplicationInfo appInfo : packages) { if ((appInfo.flags &
+         * ApplicationInfo.FLAG_SYSTEM) == 0) { // // Third Party Applications AppManagerModel
+         * appManagerModel = new AppManagerModel();
+         * appManagerModel.setAppName(appInfo.loadLabel(getPackageManager()).toString());
+         * appManagerModel.setAppIcon(appInfo.loadIcon(getPackageManager()));
+         * appManagerModel.setPackageName(appInfo.packageName); if
+         * (lockedApp.contains(appInfo.packageName)) { appManagerModel.setLocked(true); } else {
+         * appManagerModel.setLocked(false); } applicationList.add(appManagerModel); } }
+         */ return applicationList;
     }
 
     @Override
