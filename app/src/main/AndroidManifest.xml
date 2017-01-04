@@ -19,8 +19,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity
-            android:name="com.codeartist.applocker.activity.AppManagerActivity">
+        <activity android:name="com.codeartist.applocker.activity.AppManagerActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -44,14 +43,23 @@
             android:label="@string/app_name" />
 
         <activity
+            android:name="com.codeartist.applocker.activity.PackageAddActivity"
+            android:theme="@style/AlertDialogStyle"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true"
+            android:label="@string/app_name" />
+
+
+        <activity
             android:name="com.codeartist.applocker.activity.DummyActivity"
             android:excludeFromRecents="true"
             android:label="@string/app_name" />
 
         <service
             android:name="com.codeartist.applocker.service.AppLockerService"
-            android:stopWithTask="false"
-            android:exported="false"></service>
+            android:exported="false"
+            android:stopWithTask="false"></service>
+
         <service
             android:name="com.codeartist.applocker.service.ProtectorLockService"
             android:exported="false"></service>
@@ -65,12 +73,13 @@
 
         <receiver android:name=".receiver.PackageRemoveReceiver">
             <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_INSTALL" />
-                <action android:name="android.intent.action.PACKAGE_ADDED" />
                 <action android:name="android.intent.action.PACKAGE_REMOVED" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.DELETE" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".receiver.PackageAddReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>

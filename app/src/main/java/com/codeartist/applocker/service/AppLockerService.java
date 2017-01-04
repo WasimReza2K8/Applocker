@@ -40,7 +40,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.PowerManager;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -175,7 +174,8 @@ public class AppLockerService extends Service {
         filterClock.addAction(Intent.ACTION_TIME_CHANGED);
         filterClock.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         registerReceiver(mTimeChangedReceiver, filterClock);
-        IntentFilter protectorCompleteFilter = new IntentFilter(Constants.PROTECTOR_COMPLETE_BROADCAST_KEY);
+        IntentFilter protectorCompleteFilter = new IntentFilter(
+                Constants.PROTECTOR_COMPLETE_BROADCAST_KEY);
         registerReceiver(mProtectComplete, protectorCompleteFilter);
         startForeground(Constants.FOREGROUND_NOTIFICATION_ID, Utils.createNotification(this));
         // restartService(60 * 60 * 1000, true);
@@ -202,11 +202,13 @@ public class AppLockerService extends Service {
         }
     });
 
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        stopService(new Intent(this, ProtectorLockService.class));
+        if (Utils.isMyServiceRunning(ProtectorLockService.class, this)) {
+            stopService(new Intent(this, ProtectorLockService.class));
+        }
         startService(new Intent(this, ProtectorLockService.class));
+
         return START_STICKY;
     }
 
@@ -226,11 +228,11 @@ public class AppLockerService extends Service {
         }
     };
 
-
     private BroadcastReceiver mProtectComplete = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            stopService(new Intent(context, ProtectorLockService.class));        }
+            stopService(new Intent(context, ProtectorLockService.class));
+        }
     };
 
     private BroadcastReceiver mTimeChangedReceiver = new BroadcastReceiver() {
@@ -260,22 +262,17 @@ public class AppLockerService extends Service {
         }
     }
 
-   /* @Override
-    public void onTaskRemoved(Intent rootIntent) {
-       // restartService(1000, false);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Intent restartService = new Intent(getApplicationContext(), this.getClass());
-            restartService.setPackage(getPackageName());
-            PendingIntent restartServicePI = PendingIntent.getService(getApplicationContext(), 1,
-                    restartService, PendingIntent.FLAG_ONE_SHOT);
-            AlarmManager alarmService = (AlarmManager) getApplicationContext()
-                    .getSystemService(Context.ALARM_SERVICE);
-            alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000,
-                    restartServicePI);
-        }
-       // super.onTaskRemoved(rootIntent);
-    }
-*/
+    /*
+     * @Override public void onTaskRemoved(Intent rootIntent) { // restartService(1000, false); if
+     * (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { Intent restartService = new
+     * Intent(getApplicationContext(), this.getClass());
+     * restartService.setPackage(getPackageName()); PendingIntent restartServicePI =
+     * PendingIntent.getService(getApplicationContext(), 1, restartService,
+     * PendingIntent.FLAG_ONE_SHOT); AlarmManager alarmService = (AlarmManager)
+     * getApplicationContext() .getSystemService(Context.ALARM_SERVICE);
+     * alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000,
+     * restartServicePI); } // super.onTaskRemoved(rootIntent); }
+     */
     private void restartService(int interval, boolean isRepeating) {
         // stopSelf();
         Log.e("activity on TOp", "restart service");
@@ -358,7 +355,7 @@ public class AppLockerService extends Service {
         }
     }
 
-    private void sendMessageToHandler(String ob){
+    private void sendMessageToHandler(String ob) {
         Message msg = Message.obtain(); // Creates an new Message instance
         msg.obj = ob; // Put the string into Message, into "obj" field.
         msg.setTarget(mHandler); // Set the Handler
@@ -522,7 +519,7 @@ public class AppLockerService extends Service {
             checkerDialog.setOnKeyListener(new Dialog.OnKeyListener() {
                 @Override
                 public boolean onKey(DialogInterface dialog, int keyCode,
-                                     KeyEvent event) {
+                        KeyEvent event) {
 
                     if (keyCode == KeyEvent.KEYCODE_BACK) {
                         goToHomeScreen();
@@ -592,7 +589,7 @@ public class AppLockerService extends Service {
             checkerDialog.setOnKeyListener(new Dialog.OnKeyListener() {
                 @Override
                 public boolean onKey(DialogInterface dialog, int keyCode,
-                                     KeyEvent event) {
+                        KeyEvent event) {
 
                     if (keyCode == KeyEvent.KEYCODE_BACK) {
                         Intent startMain = new Intent(Intent.ACTION_MAIN);
@@ -793,7 +790,6 @@ public class AppLockerService extends Service {
         if (mProtectComplete != null) {
             unregisterReceiver(mProtectComplete);
         }
-
 
         if (mHomeWatcher != null) {
             mHomeWatcher.stopWatch();

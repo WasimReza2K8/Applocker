@@ -68,7 +68,7 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar_AppList);
         mAdapter = new AppManagerAdapter(this, mClickListener);
         mAppListView.setAdapter(mAdapter);
-        if (!isMyServiceRunning(AppLockerService.class, this)) {
+        if (!Utils.isMyServiceRunning(AppLockerService.class, this)) {
             startService(new Intent(this, AppLockerService.class));
         }
         mDb = DBManager.getInstance(getApplicationContext());
@@ -101,7 +101,7 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
 
     }
 
-    private boolean isMyServiceRunning(Class<?> serviceClass, Context context) {
+   /* private boolean isMyServiceRunning(Class<?> serviceClass, Context context) {
         ActivityManager manager = (ActivityManager) context
                 .getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager
@@ -111,7 +111,7 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
             }
         }
         return false;
-    }
+    }*/
 
     private BroadcastReceiver activityClose = new BroadcastReceiver() {
         @Override

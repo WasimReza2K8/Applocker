@@ -17,6 +17,7 @@ import com.codeartist.applocker.db.DBManager;
 import com.codeartist.applocker.service.AppLockerService;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.ContentValues;
@@ -179,6 +180,18 @@ public final class Utils {
                 pkgName
         };
         db.delete(DBManager.AppLocker.TABLE, where, whereArgs);
+    }
+
+    public static boolean isMyServiceRunning(Class<?> serviceClass, Context context) {
+        ActivityManager manager = (ActivityManager) context
+                .getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager
+                .getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static Notification createNotification(Context context) {
