@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.codeartist.applocker">
-
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.GET_TASKS" />
@@ -19,10 +18,11 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.codeartist.applocker.activity.AppManagerActivity">
+        <activity android:name="com.codeartist.applocker.activity.AppManagerActivity"
+            android:excludeFromRecents="true"
+            android:noHistory= "true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -35,6 +35,10 @@
 
         <activity
             android:name="com.codeartist.applocker.activity.PatternSetterActivity"
+            android:taskAffinity="com.codeartist.applocker.verifyactivity"
+            android:noHistory= "true"
+            android:finishOnTaskLaunch="true"
+            android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true"
             android:label="@string/app_name" />
         <activity
@@ -44,16 +48,29 @@
 
         <activity
             android:name="com.codeartist.applocker.activity.PackageAddActivity"
-            android:theme="@style/AlertDialogStyle"
-            android:launchMode="singleInstance"
             android:excludeFromRecents="true"
-            android:label="@string/app_name" />
+            android:label="@string/app_name"
+            android:launchMode="singleInstance"
+            android:theme="@style/AlertDialogStyle" />
 
 
         <activity
             android:name="com.codeartist.applocker.activity.DummyActivity"
             android:excludeFromRecents="true"
             android:label="@string/app_name" />
+
+        <activity
+            android:name="com.codeartist.applocker.activity.PasswordVerifierActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:label="@string/app_name" />
+        <activity
+            android:name="com.codeartist.applocker.activity.PatternVerifierActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:label="@string/app_name" />
+
+
 
         <service
             android:name="com.codeartist.applocker.service.AppLockerService"
@@ -64,10 +81,15 @@
             android:name="com.codeartist.applocker.service.ProtectorLockService"
             android:exported="false"></service>
 
-        <receiver android:name=".receiver.ExpiredReceiver">
+        <receiver
+            android:name=".receiver.ExpiredReceiver"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-
+                <action android:name="android.intent.action.REBOOT" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
             </intent-filter>
         </receiver>
 

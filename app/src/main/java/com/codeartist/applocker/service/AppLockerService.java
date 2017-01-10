@@ -8,6 +8,9 @@ import java.util.TimerTask;
 import java.util.TreeMap;
 
 import com.codeartist.applocker.R;
+import com.codeartist.applocker.activity.DummyActivity;
+import com.codeartist.applocker.activity.PasswordVerifierActivity;
+import com.codeartist.applocker.activity.PatternVerifierActivity;
 import com.codeartist.applocker.db.DBManager;
 import com.codeartist.applocker.interfaces.OnHomePressedListener;
 import com.codeartist.applocker.receiver.ExpiredReceiver;
@@ -40,6 +43,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -91,6 +95,7 @@ public class AppLockerService extends Service {
                     break;
                 case MSG_APP_PERMITTED:
                     activityList.remove(packageName);
+                    sendMessageToHandler(Constants.KEY_CLOSE_DIALOG);
                     // Toast.makeText(getApplicationContext(), "MSG_APP_PERMITTED! "+ packageName,
                     // Toast.LENGTH_SHORT).show();
                     break;
@@ -158,12 +163,21 @@ public class AppLockerService extends Service {
 
             @Override
             public void onHomeLongPressed() {
-                // goToHomeScreen();
-                if (closeDialog.getState() == Thread.State.NEW) {
+                 //goToHomeScreen();
+               /* Intent closeSysDialog = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+                sendBroadcast(closeSysDialog);*/
+                Log.e("recent app", "new activity fired");
+                sendBroadcast(new Intent("closeRecent"));
+                destroyDialog();
+                scheduleMethod();
+                /*Intent i = new Intent(AppLockerService.this, DummyActivity.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);*/
+              /*  if (closeDialog.getState() == Thread.State.NEW) {
                     closeDialog.start();
                 } else {
                     closeDialog.run();
-                }
+                }*/
             }
         });
         mHomeWatcher.startWatch();
@@ -262,17 +276,23 @@ public class AppLockerService extends Service {
         }
     }
 
-    /*
-     * @Override public void onTaskRemoved(Intent rootIntent) { // restartService(1000, false); if
-     * (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { Intent restartService = new
-     * Intent(getApplicationContext(), this.getClass());
-     * restartService.setPackage(getPackageName()); PendingIntent restartServicePI =
-     * PendingIntent.getService(getApplicationContext(), 1, restartService,
-     * PendingIntent.FLAG_ONE_SHOT); AlarmManager alarmService = (AlarmManager)
-     * getApplicationContext() .getSystemService(Context.ALARM_SERVICE);
-     * alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000,
-     * restartServicePI); } // super.onTaskRemoved(rootIntent); }
-     */
+     @Override
+     public void onTaskRemoved(Intent rootIntent) { // restartService(1000, false); if
+         Log.e("remove schdule", "onTask re moved called");
+         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+             Intent restartService = new
+                     Intent(getApplicationContext(), this.getClass());
+             restartService.setPackage(getPackageName());
+             PendingIntent restartServicePI =
+                     PendingIntent.getService(getApplicationContext(), 1, restartService,
+                             PendingIntent.FLAG_ONE_SHOT);
+             AlarmManager alarmService = (AlarmManager)
+                     getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+             alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000,
+                     restartServicePI);
+         }
+     }// super.onTaskRemoved(rootIntent); }
+
     private void restartService(int interval, boolean isRepeating) {
         // stopSelf();
         Log.e("activity on TOp", "restart service");
@@ -326,7 +346,6 @@ public class AppLockerService extends Service {
 
             showLockerScreen(packageName);
             // showPatternDialog(packageName);
-
             removeScheduleTask();
         }
     };
@@ -336,8 +355,16 @@ public class AppLockerService extends Service {
                 Constants.PATTERN_LOCK);
         if (lockType == Constants.PATTERN_LOCK) {
             showPatternDialogOption(packageName);
+           /* Intent intent = new Intent(this, PatternVerifierActivity.class);
+            intent.putExtra(Constants.KEY_PKG_NAME, packageName);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);*/
         } else {
-            showCheckerDialog(packageName);
+          //  showCheckerDialog(packageName);
+            Intent intent = new Intent(this, PasswordVerifierActivity.class);
+            intent.putExtra(Constants.KEY_PKG_NAME, packageName);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         }
     }
 
@@ -749,7 +776,7 @@ public class AppLockerService extends Service {
                 public void onPatternDetected() {
                     String patternString = pattern.getPatternString();
                     if (patternString == null) {
-                        patternString = pattern.getPatternString();
+                       // patternString = pattern.getPatternString();
                         // patternView.clearPattern();
                         return;
                     }

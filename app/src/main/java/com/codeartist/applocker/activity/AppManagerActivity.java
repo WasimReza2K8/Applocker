@@ -14,7 +14,6 @@ import com.codeartist.applocker.utility.Preferences;
 import com.codeartist.applocker.utility.Utils;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -98,25 +97,29 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
 
         // sendMessageToService(getPackageName(), AppLockerService.MSG_APP_LOCK_SCREEN);
         registerReceiver(activityClose, new IntentFilter("closeActivity"));
+        registerReceiver(closeRecent, new IntentFilter("closeRecent"));
 
     }
 
-   /* private boolean isMyServiceRunning(Class<?> serviceClass, Context context) {
-        ActivityManager manager = (ActivityManager) context
-                .getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager
-                .getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }*/
+    /*
+     * private boolean isMyServiceRunning(Class<?> serviceClass, Context context) { ActivityManager
+     * manager = (ActivityManager) context .getSystemService(Context.ACTIVITY_SERVICE); for
+     * (ActivityManager.RunningServiceInfo service : manager .getRunningServices(Integer.MAX_VALUE))
+     * { if (serviceClass.getName().equals(service.service.getClassName())) { return true; } }
+     * return false; }
+     */
 
     private BroadcastReceiver activityClose = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             finish();
+        }
+    };
+    private BroadcastReceiver closeRecent = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            finish();
+            startActivity(new Intent(AppManagerActivity.this, DummyActivity.class));
         }
     };
 
@@ -194,6 +197,14 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
         sendMessageToService(packageName, AppLockerService.MSG_APP_UNLOCK);
         // Log.e("locker", "unlocked");
     }
+
+    /*
+     * @Override public void onWindowFocusChanged(boolean hasFocus) {
+     * super.onWindowFocusChanged(hasFocus); Log.d("Focus debug", "Focus changed !"); if(!hasFocus)
+     * { Log.d("Focus debug", "Lost focus !"); Intent closeDialog = new
+     * Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS); sendBroadcast(closeDialog); } }
+     */
+
 
     private void addShortcut() {
         // Adding shortcut for MainActivity
@@ -392,5 +403,6 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
             mBound = false;
         }
         unregisterReceiver(activityClose);
+        unregisterReceiver(closeRecent);
     }
 }
