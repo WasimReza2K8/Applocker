@@ -8,9 +8,6 @@ import java.util.TimerTask;
 import java.util.TreeMap;
 
 import com.codeartist.applocker.R;
-import com.codeartist.applocker.activity.DummyActivity;
-import com.codeartist.applocker.activity.PasswordVerifierActivity;
-import com.codeartist.applocker.activity.PatternVerifierActivity;
 import com.codeartist.applocker.db.DBManager;
 import com.codeartist.applocker.interfaces.OnHomePressedListener;
 import com.codeartist.applocker.receiver.ExpiredReceiver;
@@ -167,7 +164,7 @@ public class AppLockerService extends Service {
                /* Intent closeSysDialog = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
                 sendBroadcast(closeSysDialog);*/
                 Log.e("recent app", "new activity fired");
-                sendBroadcast(new Intent("closeRecent"));
+                //sendBroadcast(new Intent("closeRecent"));
                 destroyDialog();
                 scheduleMethod();
                 /*Intent i = new Intent(AppLockerService.this, DummyActivity.class);
@@ -208,8 +205,9 @@ public class AppLockerService extends Service {
         @Override
         public void run() {
             try {
-                Thread.sleep(1000);
                 sendMessageToHandler(Constants.KEY_CLOSE_DIALOG);
+                Thread.sleep(1000);
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -360,11 +358,11 @@ public class AppLockerService extends Service {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);*/
         } else {
-          //  showCheckerDialog(packageName);
-            Intent intent = new Intent(this, PasswordVerifierActivity.class);
+            showCheckerDialog(packageName);
+          /*  Intent intent = new Intent(this, PasswordVerifierActivity.class);
             intent.putExtra(Constants.KEY_PKG_NAME, packageName);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
+            startActivity(intent);*/
         }
     }
 
@@ -550,6 +548,7 @@ public class AppLockerService extends Service {
 
                     if (keyCode == KeyEvent.KEYCODE_BACK) {
                         goToHomeScreen();
+
 
                         /*
                          * destroyDialog(); scheduleMethod();
