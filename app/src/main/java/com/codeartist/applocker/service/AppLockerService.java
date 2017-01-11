@@ -8,6 +8,7 @@ import java.util.TimerTask;
 import java.util.TreeMap;
 
 import com.codeartist.applocker.R;
+import com.codeartist.applocker.activity.DummyActivity;
 import com.codeartist.applocker.db.DBManager;
 import com.codeartist.applocker.interfaces.OnHomePressedListener;
 import com.codeartist.applocker.receiver.ExpiredReceiver;
@@ -160,21 +161,29 @@ public class AppLockerService extends Service {
 
             @Override
             public void onHomeLongPressed() {
-                 //goToHomeScreen();
-               /* Intent closeSysDialog = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-                sendBroadcast(closeSysDialog);*/
+                // goToHomeScreen();
+                /*
+                 * Intent closeSysDialog = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+                 * sendBroadcast(closeSysDialog);
+                 */
                 Log.e("recent app", "new activity fired");
-                //sendBroadcast(new Intent("closeRecent"));
+                if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
+                        && android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP){
+                  //  sendBroadcast(new Intent("closeRecent"));
+                }
                 destroyDialog();
-                scheduleMethod();
-                /*Intent i = new Intent(AppLockerService.this, DummyActivity.class);
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(i);*/
-              /*  if (closeDialog.getState() == Thread.State.NEW) {
-                    closeDialog.start();
-                } else {
-                    closeDialog.run();
-                }*/
+                //scheduleMethod();
+                /*
+                 * Intent i = new Intent(AppLockerService.this, DummyActivity.class);
+                 * i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); startActivity(i);
+                 */
+
+                  if (closeDialog.getState() == Thread.State.NEW) {
+                      closeDialog.start();
+                  } else {
+                  closeDialog.run();
+                  }
+
             }
         });
         mHomeWatcher.startWatch();
@@ -206,9 +215,9 @@ public class AppLockerService extends Service {
         public void run() {
             try {
                 sendMessageToHandler(Constants.KEY_CLOSE_DIALOG);
-                Thread.sleep(1000);
+                Thread.sleep(150);
 
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -274,22 +283,26 @@ public class AppLockerService extends Service {
         }
     }
 
-     @Override
-     public void onTaskRemoved(Intent rootIntent) { // restartService(1000, false); if
-         Log.e("remove schdule", "onTask re moved called");
-         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-             Intent restartService = new
-                     Intent(getApplicationContext(), this.getClass());
-             restartService.setPackage(getPackageName());
-             PendingIntent restartServicePI =
-                     PendingIntent.getService(getApplicationContext(), 1, restartService,
-                             PendingIntent.FLAG_ONE_SHOT);
-             AlarmManager alarmService = (AlarmManager)
-                     getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-             alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000,
-                     restartServicePI);
-         }
-     }// super.onTaskRemoved(rootIntent); }
+    @Override
+    public void onTaskRemoved(Intent rootIntent) { // restartService(1000, false); if
+        Log.e("remove schdule", "onTask re moved called");
+        Intent i = new Intent(AppLockerService.this, DummyActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(i);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Intent restartService = new Intent(getApplicationContext(), this.getClass());
+            restartService.setPackage(getPackageName());
+            PendingIntent restartServicePI = PendingIntent.getService(getApplicationContext(), 1,
+                    restartService,
+                    PendingIntent.FLAG_ONE_SHOT);
+            AlarmManager alarmService = (AlarmManager) getApplicationContext()
+                    .getSystemService(Context.ALARM_SERVICE);
+            alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000,
+                    restartServicePI);
+        }
+   // }
+    super.onTaskRemoved(rootIntent);
+    }
 
     private void restartService(int interval, boolean isRepeating) {
         // stopSelf();
@@ -353,16 +366,18 @@ public class AppLockerService extends Service {
                 Constants.PATTERN_LOCK);
         if (lockType == Constants.PATTERN_LOCK) {
             showPatternDialogOption(packageName);
-           /* Intent intent = new Intent(this, PatternVerifierActivity.class);
-            intent.putExtra(Constants.KEY_PKG_NAME, packageName);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);*/
+            /*
+             * Intent intent = new Intent(this, PatternVerifierActivity.class);
+             * intent.putExtra(Constants.KEY_PKG_NAME, packageName);
+             * intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); startActivity(intent);
+             */
         } else {
             showCheckerDialog(packageName);
-          /*  Intent intent = new Intent(this, PasswordVerifierActivity.class);
-            intent.putExtra(Constants.KEY_PKG_NAME, packageName);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);*/
+            /*
+             * Intent intent = new Intent(this, PasswordVerifierActivity.class);
+             * intent.putExtra(Constants.KEY_PKG_NAME, packageName);
+             * intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); startActivity(intent);
+             */
         }
     }
 
@@ -546,13 +561,16 @@ public class AppLockerService extends Service {
                 public boolean onKey(DialogInterface dialog, int keyCode,
                         KeyEvent event) {
 
-                    if (keyCode == KeyEvent.KEYCODE_BACK) {
-                        goToHomeScreen();
-
+                    if (keyCode == KeyEvent.KEYCODE_BACK && checkerDialog != null && checkerDialog.isShowing()) {
+                        // goToHomeScreen();
+                        moveFrontRecentTask();
 
                         /*
                          * destroyDialog(); scheduleMethod();
                          */
+
+                        sendBroadcast(new Intent("closeActivity"));
+
                         if (closeDialog.getState() == Thread.State.NEW) {
                             closeDialog.start();
                         } else {
@@ -595,7 +613,7 @@ public class AppLockerService extends Service {
 
     }
 
-    private void showPatternDialog(final String packageName) {
+    /*private void showPatternDialog(final String packageName) {
         if (checkerDialog == null || !checkerDialog.isShowing()) {
 
             final Context context = getApplicationContext();
@@ -631,7 +649,7 @@ public class AppLockerService extends Service {
                 }
             });
 
-            /*
+            *//*
              * check.setOnClickListener(new View.OnClickListener() {
              * @Override public void onClick(View view) { String savedPassword =
              * Preferences.loadString(getApplicationContext(), Preferences.KEY_APP_LOCKER_PASSWORD,
@@ -640,9 +658,9 @@ public class AppLockerService extends Service {
              * activityList.remove(packageName); scheduleMethod(); } else {
              * Toast.makeText(getApplicationContext(), "Wrong Password", Toast.LENGTH_LONG).show();
              * } } });
-             */
+             *//*
 
-            /*
+            *//*
              * pattern.setOnPatternDetectedListener(new PatternView.OnPatternDetectedListener() {
              * @Override public void onPatternDetected() { String savedPassword =
              * Preferences.loadString(getApplicationContext(), Preferences.KEY_APP_LOCKER_PASSWORD,
@@ -651,7 +669,7 @@ public class AppLockerService extends Service {
              * activityList.remove(packageName); scheduleMethod(); } else {
              * Toast.makeText(getApplicationContext(), "Wrong Password", Toast.LENGTH_LONG).show();
              * } } });
-             */
+             *//*
 
             pattern.setCallBack(new Lock9View.CallBack() {
                 @Override
@@ -674,32 +692,53 @@ public class AppLockerService extends Service {
         }
 
     }
+*/
 
-    private void killApps() {
-        List<ApplicationInfo> packages;
-        PackageManager pm;
-        pm = getPackageManager();
-        // get a list of installed apps.
-        // packages = pm.getInstalledApplications(0);
+      private void killApps() {
+          List<ApplicationInfo> packages;
+          PackageManager pm;
+          pm = getPackageManager(); // get a list of installed apps. // packages =
+          pm.getInstalledApplications(0);
+          ActivityManager mActivityManager = (ActivityManager)
+                  getSystemService(Context.ACTIVITY_SERVICE);
+          List<ActivityManager.RunningAppProcessInfo> pids
+                  = mActivityManager.getRunningAppProcesses();
+          int processid = 0;
+          for (int i = 0; i < pids.size(); i++) {
+              ActivityManager.RunningAppProcessInfo info = pids.get(i);
+              processid = info.pid;
+          }
+        //  mActivityManager.moveTaskToFront(processid, ActivityManager.MOVE_TASK_WITH_HOME); //
+          android.os.Process.killProcess(processid);
+      }
 
+
+    private void moveFrontRecentTask() {
         ActivityManager mActivityManager = (ActivityManager) getSystemService(
                 Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningAppProcessInfo> pids = mActivityManager
-                .getRunningAppProcesses();
-        int processid = 0;
-        for (int i = 0; i < pids.size(); i++) {
-            ActivityManager.RunningAppProcessInfo info = pids.get(i);
-            if (info.processName.equalsIgnoreCase(getTopActivity())) {
-                processid = info.pid;
-            }
+        ActivityManager.RecentTaskInfo recentTask = null;
+        try {
+            recentTask = mActivityManager
+                    .getRecentTasks(3, ActivityManager.RECENT_IGNORE_UNAVAILABLE).get(1);
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
+            goToHomeScreen();
         }
-        android.os.Process.killProcess(processid);
-        /*
-         * for (ApplicationInfo packageInfo : packages) {
-         * if(packageInfo.packageName.equals(getTopActivity())){
-         * mActivityManager.restartPackage(getTopActivity()); } //
-         * mActivityManager.killBackgroundProcesses(packageInfo.packageName); }
-         */
+        // maintains state more accurately - only available in API 11+ (3.0/Honeycomb+)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB
+                && recentTask != null) {
+            // final ActivityManager am = (ActivityManager)
+            // getSystemService(Context.ACTIVITY_SERVICE);
+            //killApps();
+            mActivityManager.moveTaskToFront(recentTask.id, ActivityManager.MOVE_TASK_NO_USER_ACTION);
+        } else { // API 10 and below (Gingerbread on down)
+            /*
+             * Intent restartTaskIntent = new Intent(recentTask.baseIntent); if (restartTaskIntent
+             * != null) { restartTaskIntent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
+             * try { startActivity(restartTaskIntent); } catch (ActivityNotFoundException e) {
+             * Log.w("MyApp", "Unable to launch recent task", e); } }
+             */
+        }
     }
 
     private void showPatternDialogOption(final String packageName) {
@@ -723,10 +762,13 @@ public class AppLockerService extends Service {
                 @Override
                 public boolean onKey(DialogInterface dialog, int keyCode,
                         KeyEvent event) {
-                    if (keyCode == KeyEvent.KEYCODE_BACK) {
-                        goToHomeScreen();
+                    if (keyCode == KeyEvent.KEYCODE_BACK && checkerDialog != null && checkerDialog.isShowing()) {
+                        // goToHomeScreen();
+                        // goLauncherScreen();
                         sendBroadcast(new Intent("closeActivity"));
                         // killApps();
+                        moveFrontRecentTask();
+
                         if (closeDialog.getState() == Thread.State.NEW) {
                             closeDialog.start();
                         } else {
@@ -775,7 +817,7 @@ public class AppLockerService extends Service {
                 public void onPatternDetected() {
                     String patternString = pattern.getPatternString();
                     if (patternString == null) {
-                       // patternString = pattern.getPatternString();
+                        // patternString = pattern.getPatternString();
                         // patternView.clearPattern();
                         return;
                     }

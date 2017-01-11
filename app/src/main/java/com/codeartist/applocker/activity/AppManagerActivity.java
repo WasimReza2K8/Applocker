@@ -17,6 +17,7 @@ import android.app.Activity;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
@@ -29,6 +30,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -87,13 +89,11 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
         // addShortcut();
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             if (!isPermittedToLollipop()) {
-                startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+                alertForUserAccess();
             }
         }
 
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            checkDrawOverlayPermission();
-        }
+
 
         // sendMessageToService(getPackageName(), AppLockerService.MSG_APP_LOCK_SCREEN);
         registerReceiver(activityClose, new IntentFilter("closeActivity"));
@@ -118,22 +118,65 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
     private BroadcastReceiver closeRecent = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            finish();
             startActivity(new Intent(AppManagerActivity.this, DummyActivity.class));
+            finish();
         }
     };
 
     public final static int REQUEST_CODE_OVERLAY = 101; /* (see edit II) */
+    public final static int REQUEST_CODE_ACCESS = 202; /* (see edit II) */
 
     public void checkDrawOverlayPermission() {
         /** check if we already have permission to draw over other apps */
-        if (!Settings.canDrawOverlays(this)) {
+        if (!isEnableToDrawOverlays()) {
             /** if not construct intent to request permission */
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                     Uri.parse("package:" + getPackageName()));
             /** request permission via start activity for result */
             startActivityForResult(intent, REQUEST_CODE_OVERLAY);
         }
+    }
+
+    private void alertForUserAccess(){
+        AlertDialog.Builder  dialog = new AlertDialog.Builder(this);
+        dialog.setTitle(getString(R.string.app_name))
+                .setIcon(R.mipmap.ic_launcher)
+                .setMessage(getString(R.string.lock_request_message))
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialoginterface, int i) {
+                        dialoginterface.cancel();
+                    }
+                })
+                .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialoginterface, int i) {
+                        startActivityForResult(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS), REQUEST_CODE_ACCESS);
+                        dialoginterface.cancel();
+                    }
+                }).show();
+
+    }
+
+    private void alertForOverlays() {
+        AlertDialog.Builder  dialog = new AlertDialog.Builder(this);
+        dialog.setTitle(getString(R.string.app_name))
+                .setIcon(R.mipmap.ic_launcher)
+                .setMessage(getString(R.string.lock_request_message))
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialoginterface, int i) {
+                        dialoginterface.cancel();
+                    }
+                })
+                .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialoginterface, int i) {
+                        checkDrawOverlayPermission();
+                        dialoginterface.cancel();
+                    }
+                }).show();
+
+    }
+
+    private boolean isEnableToDrawOverlays(){
+       return Settings.canDrawOverlays(this);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -181,6 +224,18 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
     }
 
     private void appLocked(View view, String packageName) throws ClassCastException {
+        if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            if(!isPermittedToLollipop()){
+                alertForUserAccess();
+                return;
+            } else if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if(!isEnableToDrawOverlays()){
+                    alertForOverlays();
+                    return;
+                }
+            }
+        }
+
         if (view != null) {
             ImageView image = (ImageView) view;
             clockWiseOrAntiClockWise(image, true);
@@ -272,8 +327,22 @@ public final class AppManagerActivity extends BaseServiceBinderActivity {
                     }
                 }
             }
-        } else if (requestCode == REQUEST_CODE_OVERLAY) {
+        } else if(requestCode == REQUEST_CODE_ACCESS){
+            if(isPermittedToLollipop()){
+                Log.e("lollipop", "get permission");
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alertForOverlays();
+                }
+            }else{
+                Log.e("lollipop", "not get permission");
+            }
 
+        }else if (requestCode == REQUEST_CODE_OVERLAY) {
+            if(isEnableToDrawOverlays()){
+                Log.e("lollipop upper", "get permission draw overlays");
+            }else{
+                Log.e("lollipop upper", "not get permission draw overlays");
+            }
         }
     }
 
