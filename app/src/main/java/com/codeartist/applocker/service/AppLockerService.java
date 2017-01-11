@@ -730,7 +730,7 @@ public class AppLockerService extends Service {
             // final ActivityManager am = (ActivityManager)
             // getSystemService(Context.ACTIVITY_SERVICE);
             //killApps();
-            mActivityManager.moveTaskToFront(recentTask.id, ActivityManager.MOVE_TASK_NO_USER_ACTION);
+            mActivityManager.moveTaskToFront(recentTask.id, ActivityManager.MOVE_TASK_WITH_HOME);
         } else { // API 10 and below (Gingerbread on down)
             /*
              * Intent restartTaskIntent = new Intent(recentTask.baseIntent); if (restartTaskIntent
@@ -748,7 +748,7 @@ public class AppLockerService extends Service {
             LayoutInflater layoutInflater = LayoutInflater.from(context);
             widget = layoutInflater.inflate(R.layout.pattern_lock_option, null);
             final PatternView pattern = (PatternView) widget.findViewById(R.id.patternView);
-            checkerDialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+            checkerDialog = new Dialog(context, R.style.DialogTheme);
             checkerDialog.setCanceledOnTouchOutside(false);
             checkerDialog.setCancelable(false);
             checkerDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_PHONE);
